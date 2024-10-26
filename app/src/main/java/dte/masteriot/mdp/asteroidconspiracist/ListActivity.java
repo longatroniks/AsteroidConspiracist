@@ -1,12 +1,12 @@
-// Parts of the code of this example app have ben taken from:
-// https://enoent.fr/posts/recyclerview-basics/
-// https://developer.android.com/guide/topics/ui/layout/recyclerview
-
 package dte.masteriot.mdp.asteroidconspiracist;
+
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,18 +18,25 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class ListActivity extends AppCompatActivity {
 
     // App-specific dataset:
-    private static final Dataset dataset = new Dataset();
-
+    private static final NeoWsAPIClient NEO_WS_API_CLIENT = new NeoWsAPIClient();
     private RecyclerView recyclerView;
+    private MyAdapter recyclerViewAdapter;
     private SelectionTracker<Long> tracker;
     private final MyOnItemActivatedListener myOnItemActivatedListener =
-            new MyOnItemActivatedListener(this, dataset);
-
+            new MyOnItemActivatedListener(this, NEO_WS_API_CLIENT);
+    private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +45,18 @@ public class ListActivity extends AppCompatActivity {
 
         // Prepare the RecyclerView:
         recyclerView = findViewById(R.id.recyclerView);
-        MyAdapter recyclerViewAdapter = new MyAdapter(dataset);
+        recyclerViewAdapter = new MyAdapter(new ArrayList<>()); // Initialize with an empty list
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        // Choose the layout manager to be set.
-        // some options for the layout manager:  GridLayoutManager, LinearLayoutManager, StaggeredGridLayoutManager
-        // by default, a linear layout is chosen:
+        // Choose the layout manager
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Selection tracker (to allow for selection of items):
+        // Selection tracker setup
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
                 new MyItemKeyProvider(ItemKeyProvider.SCOPE_MAPPED, recyclerView),
-//                new StableIdKeyProvider(recyclerView), // This caused the app to crash on long clicks
                 new MyItemDetailsLookup(recyclerView),
                 StorageStrategy.createLongStorage())
                 .withOnItemActivatedListener(myOnItemActivatedListener)
@@ -60,50 +64,64 @@ public class ListActivity extends AppCompatActivity {
         recyclerViewAdapter.setSelectionTracker(tracker);
 
         if (savedInstanceState != null) {
-            // Restore state related to selections previously made
             tracker.onRestoreInstanceState(savedInstanceState);
         }
+
+        // Fetch data from the NeoWs API
+        fetchAsteroids();
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        tracker.onSaveInstanceState(outState); // Save state about selections.
+        tracker.onSaveInstanceState(outState);
+    }
+
+    // Fetch asteroids from the API
+    private void fetchAsteroids() {
+        executorService.execute(() -> {
+            try {
+                // Make the API call and parse the response
+                String jsonResponse = NEO_WS_API_CLIENT.getAsteroids();
+                Log.d(TAG,"JSONResponse right hya: " + jsonResponse);
+                List<Asteroid> asteroids = AsteroidParser.parseAsteroids(jsonResponse);
+
+                runOnUiThread(() -> {
+                    if (asteroids != null) {
+                        recyclerViewAdapter.updateData(asteroids); // Method to update the adapter with new data
+                    } else {
+                        Toast.makeText(ListActivity.this, "Failed to fetch asteroids", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(ListActivity.this, "Failed to fetch asteroids", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     // ------ Buttons' on-click listeners ------ //
 
     public void listLayout(View view) {
-        // Button to see in a linear fashion has been clicked:
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     public void gridLayout(View view) {
-        // Button to see in a grid fashion has been clicked:
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
     }
 
     public void seeCurrentSelection(View view) {
-        // Button "see current selection" has been clicked:
-
         Iterator<Long> iteratorSelectedItemsKeys = tracker.getSelection().iterator();
-        // This iterator allows to navigate through the keys of the currently selected items.
-        // Complete info on getSelection():
-        // https://developer.android.com/reference/androidx/recyclerview/selection/SelectionTracker#getSelection()
-        // Complete info on class Selection (getSelection() returns an object of this class):
-        // https://developer.android.com/reference/androidx/recyclerview/selection/Selection
-
-        String text = "";
+        StringBuilder text = new StringBuilder();
         while (iteratorSelectedItemsKeys.hasNext()) {
-            text += iteratorSelectedItemsKeys.next().toString();
+            text.append(iteratorSelectedItemsKeys.next().toString());
             if (iteratorSelectedItemsKeys.hasNext()) {
-                text += ", ";
+                text.append(", ");
             }
         }
-        text = "Keys of currently selected items = \n" + text;
+        text = new StringBuilder("Keys of currently selected items = \n" + text);
         Intent i = new Intent(this, SecondActivity.class);
-        i.putExtra("text", text);
+        i.putExtra("text", text.toString());
         startActivity(i);
     }
-
 }

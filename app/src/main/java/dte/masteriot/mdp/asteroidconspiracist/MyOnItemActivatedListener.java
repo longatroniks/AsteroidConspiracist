@@ -19,11 +19,11 @@ public class MyOnItemActivatedListener implements OnItemActivatedListener<Long> 
     private static final String TAG = "TAGListOfItems, MyOnItemActivatedListener";
 
     private final Context context;
-    private Dataset dataset; // reference to the dataset, so that the activated item's data can be accessed if necessary
+    private NeoWsAPIClient neoWsAPIClient; // reference to the dataset, so that the activated item's data can be accessed if necessary
 
-    public MyOnItemActivatedListener(Context context, Dataset ds) {
+    public MyOnItemActivatedListener(Context context, NeoWsAPIClient ds) {
         this.context = context;
-        this.dataset = ds;
+        this.neoWsAPIClient = ds;
     }
 
     // ------ Implementation of methods ------ //
