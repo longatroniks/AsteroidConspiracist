@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.OnItemActivatedListener;
 
-public class MyOnItemActivatedListener implements OnItemActivatedListener<Long> {
+public class AsteroidOnItemActivatedListener implements OnItemActivatedListener<Long> {
 
     // This class serves to "Register an OnItemActivatedListener to be notified when an item
     // is activated (tapped or double clicked)."
@@ -21,7 +21,7 @@ public class MyOnItemActivatedListener implements OnItemActivatedListener<Long> 
     private final Context context;
     private NeoWsAPIClient neoWsAPIClient; // reference to the dataset, so that the activated item's data can be accessed if necessary
 
-    public MyOnItemActivatedListener(Context context, NeoWsAPIClient ds) {
+    public AsteroidOnItemActivatedListener(Context context, NeoWsAPIClient ds) {
         this.context = context;
         this.neoWsAPIClient = ds;
     }

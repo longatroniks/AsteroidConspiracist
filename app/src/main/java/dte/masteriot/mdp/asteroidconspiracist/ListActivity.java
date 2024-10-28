@@ -32,10 +32,10 @@ public class ListActivity extends AppCompatActivity {
     // App-specific dataset:
     private static final NeoWsAPIClient NEO_WS_API_CLIENT = new NeoWsAPIClient();
     private RecyclerView recyclerView;
-    private MyAdapter recyclerViewAdapter;
+    private AsteroidAdapter recyclerViewAdapter;
     private SelectionTracker<Long> tracker;
-    private final MyOnItemActivatedListener myOnItemActivatedListener =
-            new MyOnItemActivatedListener(this, NEO_WS_API_CLIENT);
+    private final AsteroidOnItemActivatedListener asteroidOnItemActivatedListener =
+            new AsteroidOnItemActivatedListener(this, NEO_WS_API_CLIENT);
     private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
     @Override
@@ -45,7 +45,7 @@ public class ListActivity extends AppCompatActivity {
 
         // Prepare the RecyclerView:
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerViewAdapter = new MyAdapter(new ArrayList<>()); // Initialize with an empty list
+        recyclerViewAdapter = new AsteroidAdapter(new ArrayList<>()); // Initialize with an empty list
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -56,10 +56,10 @@ public class ListActivity extends AppCompatActivity {
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
-                new MyItemKeyProvider(ItemKeyProvider.SCOPE_MAPPED, recyclerView),
-                new MyItemDetailsLookup(recyclerView),
+                new AsteroidItemKeyProvider(ItemKeyProvider.SCOPE_MAPPED, recyclerView),
+                new AsteroidItemDetailsLookup(recyclerView),
                 StorageStrategy.createLongStorage())
-                .withOnItemActivatedListener(myOnItemActivatedListener)
+                .withOnItemActivatedListener(asteroidOnItemActivatedListener)
                 .build();
         recyclerViewAdapter.setSelectionTracker(tracker);
 

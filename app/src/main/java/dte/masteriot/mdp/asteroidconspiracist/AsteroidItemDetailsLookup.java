@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
-final class MyItemDetailsLookup extends ItemDetailsLookup<Long> {
+final class AsteroidItemDetailsLookup extends ItemDetailsLookup<Long> {
 
     // From [https://developer.android.com/reference/androidx/recyclerview/selection/ItemDetailsLookup]:
     // The Selection library calls the method getItemDetails(MotionEvent) of an object of this class
@@ -22,7 +22,7 @@ final class MyItemDetailsLookup extends ItemDetailsLookup<Long> {
     private final RecyclerView mRecyclerView;
 
     @SuppressLint("LongLogTag")
-    MyItemDetailsLookup(RecyclerView recyclerView) {
+    AsteroidItemDetailsLookup(RecyclerView recyclerView) {
         Log.d(TAG, "MyItemDetailsLookup() called");
         mRecyclerView = recyclerView;
     }
@@ -35,9 +35,9 @@ final class MyItemDetailsLookup extends ItemDetailsLookup<Long> {
         View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
         if (view != null) {
             RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(view);
-            if (holder instanceof MyViewHolder) {
+            if (holder instanceof AsteroidViewHolder) {
                 int positionOfTheHolder = holder.getAbsoluteAdapterPosition();
-                Long keyOfTheHolder = ((MyAdapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
+                Long keyOfTheHolder = ((AsteroidAdapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
 
                 ItemDetails<Long> itemDetails = new ItemDetails<Long>() {
                     @Override

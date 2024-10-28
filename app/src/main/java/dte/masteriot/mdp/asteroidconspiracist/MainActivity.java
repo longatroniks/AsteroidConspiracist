@@ -20,18 +20,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Botón de flecha para cambiar de actividad
         Button arrowButton = findViewById(R.id.arrow_button);
 
-        // Cargar animación de parpadeo
         Animation blinkAnimation = AnimationUtils.loadAnimation(this, R.anim.blink);
         arrowButton.startAnimation(blinkAnimation);
 
-        // Listener para cambiar de actividad cuando se presione el botón
         arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navegar a la siguiente actividad
                 Intent intent = new Intent(MainActivity.this, ListActivity.class);
                 startActivity(intent);
             }
