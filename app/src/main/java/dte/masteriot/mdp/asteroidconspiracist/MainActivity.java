@@ -1,7 +1,3 @@
-// Parts of the code of this example app have ben taken from:
-// https://enoent.fr/posts/recyclerview-basics/
-// https://developer.android.com/guide/topics/ui/layout/recyclerview
-
 package dte.masteriot.mdp.asteroidconspiracist;
 
 import android.content.Intent;
@@ -20,15 +16,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Botón para ListActivity
         Button arrowButton = findViewById(R.id.arrow_button);
-
         Animation blinkAnimation = AnimationUtils.loadAnimation(this, R.anim.blink);
         arrowButton.startAnimation(blinkAnimation);
-
         arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, ListActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // Botón para CompassActivity
+        Button compassButton = findViewById(R.id.compass_button);
+        compassButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CompassActivity.class);
                 startActivity(intent);
             }
         });

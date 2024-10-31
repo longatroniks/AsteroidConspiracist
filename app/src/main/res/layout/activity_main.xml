@@ -38,7 +38,7 @@
         android:fontFamily="monospace"
         android:textStyle="bold" />
 
-    <!-- Even Bigger Arrow Button -->
+    <!-- Arrow Button -->
     <Button
         android:id="@+id/arrow_button"
         android:layout_width="160dp"
@@ -52,4 +52,16 @@
         android:background="?attr/selectableItemBackground"
         android:elevation="3dp" />
 
+    <!-- Compass Button -->
+    <Button
+        android:id="@+id/compass_button"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_below="@id/title_text"
+        android:layout_toEndOf="@id/arrow_button"
+        android:layout_marginStart="16dp"
+        android:text="Compass"
+        android:textColor="@android:color/white"
+        android:background="?attr/selectableItemBackground"
+        android:elevation="3dp" />
 </RelativeLayout>
