@@ -38,6 +38,10 @@ public class ListActivity extends AppCompatActivity {
             new AsteroidOnItemActivatedListener(this, NEO_WS_API_CLIENT);
     private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
+    String TAG;
+    AsteroidMqtt asteroidMqtt=new AsteroidMqtt();
+    boolean bBrokerConnected=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,12 +73,36 @@ public class ListActivity extends AppCompatActivity {
 
         // Fetch data from the NeoWs API
         fetchAsteroids();
+
+        //MQTT Connection AG
+        asteroidMqtt.createMQTTclient();
+
+        // When MQTT connection is Successfully, topics can be published and subscribed. AG
+        // CompletableFuture to manage the asynchronous connection instead of a callback interface
+        asteroidMqtt.connectToBroker().thenAccept(isConnected -> {
+            if (isConnected) {
+                Log.d(TAG, "Successfully connected to the broker.");
+                bBrokerConnected=true;
+            } else {
+                Log.d(TAG, "Failed to connect to the broker.");
+                bBrokerConnected=false;
+            }
+        });
+        //
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         tracker.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //MQTT Disconnection
+        asteroidMqtt.disconnectFromBroker();
+        //
     }
 
     // Fetch asteroids from the API
@@ -89,6 +117,9 @@ public class ListActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (asteroids != null) {
                         recyclerViewAdapter.updateData(asteroids); // Method to update the adapter with new data
+                        if (bBrokerConnected)
+                            asteroidMqtt.PublishAsteroidInfo(asteroids);// Publishing the Asteroid topic if the broker is connected and there is a new update AG
+
                     } else {
                         Toast.makeText(ListActivity.this, "Failed to fetch asteroids", Toast.LENGTH_SHORT).show();
                     }
@@ -123,5 +154,19 @@ public class ListActivity extends AppCompatActivity {
         Intent i = new Intent(this, SecondActivity.class);
         i.putExtra("text", text.toString());
         startActivity(i);
+    }
+
+    public void UFOmap (View view)
+    {
+        String text = "third activity pressing button\n";
+        double latitude = 37.422;  // Replace with your desired latitude
+        double longitude = -122.084; // Replace with your desired longitude
+        Intent intent = new Intent(this, MapsActivity.class);
+
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        intent.putExtra("text", text);
+        startActivity(intent);
+
     }
 }
