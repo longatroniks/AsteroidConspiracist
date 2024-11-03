@@ -4,6 +4,9 @@
 
     <!-- This is here so we can access the API -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Add permission to Location services  AG  -->
+    <uses-permission android:name= "android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name= "android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"

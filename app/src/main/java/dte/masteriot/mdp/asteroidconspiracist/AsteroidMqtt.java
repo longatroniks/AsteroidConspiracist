@@ -17,12 +17,18 @@ import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
 public class AsteroidMqtt
 {
-    String TAG;
+    String TAG="TAG_MDPMQTT";
     private String serverHost;
     private int serverPort;
+    //Topics for Asteroid:
+        //topic=asteroidName/Id
+        //topic=asteroidName/Distance
+        //topic=asteroidName/Diameter
+    //Topics for UFO:
+        //topic=UFO/Id/Location
 
-    private String publishingTopic;
-    private String subscriptionTopic;
+    private String publishingTopic="asteroid"; //Default topic for publishing
+    private String subscriptionTopic="asteroid/#"; //Default topic for subscription
 
     private Mqtt3AsyncClient client;
 
@@ -30,15 +36,8 @@ public class AsteroidMqtt
 
     AsteroidMqtt()
     {
-        TAG = "TAG_MDPMQTT";
         serverHost="192.168.56.1";
         serverPort = 1883;
-        //topic=asteroidname/id
-        //topic=asteroidname/distance
-        //topic=asteroidname/diameter
-        publishingTopic = "asteroid";
-        subscriptionTopic = "asteroid/#";
-
     }
 
     void createMQTTclient()
@@ -54,7 +53,7 @@ public class AsteroidMqtt
     }
 
     //CompletableFuture to manage the asynchronous connection
-    CompletableFuture<Boolean> connectToBroker()
+    CompletableFuture<Boolean> connectToBroker(String messageTopicNewConnection)
     {
         Log.d(TAG, "connectToBroker()");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -77,7 +76,8 @@ public class AsteroidMqtt
                             future.complete(true); // indicate success
                             //TextViewConnection.setText("Connected to server and subscribed to topic");
                             subscribeToTopic();
-                            publishMessage(this.publishingTopic,"Hello Asteroid AG");
+                            //publishMessage(this.publishingTopic,"New Connection:Hello Asteroid Conspiracist AG");
+                            publishMessage(this.publishingTopic,messageTopicNewConnection);
                         }
                     });
         } else {
