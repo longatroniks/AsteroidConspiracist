@@ -56,6 +56,16 @@
             android:onClick="gridLayout"
             android:text="Grid"
             android:layout_margin="5dp"/>
+        <Button
+            android:id="@+id/UFOmap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="UFOmap"
+            android:text="UFO Map"
+            android:layout_margin="5dp"/>
+
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
