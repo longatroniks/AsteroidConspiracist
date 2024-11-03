@@ -23,19 +23,10 @@ public class MainActivity extends AppCompatActivity {
         arrowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ListActivity.class);
+                Intent intent = new Intent(MainActivity.this, MenuActivity.class);
                 startActivity(intent);
             }
         });
 
-        // Botón para CompassActivity
-        Button compassButton = findViewById(R.id.compass_button);
-        compassButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CompassActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 }
