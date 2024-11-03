@@ -37,12 +37,12 @@ public class MenuActivity extends AppCompatActivity {
         });
 
         // Configurar el listener para el botón MQTT
-        //btnMqtt.setOnClickListener(new View.OnClickListener() {
-          //  @Override
-          //  public void onClick(View v) {
-            //    Intent intent = new Intent(MainMenuActivity.this, MqttActivity.class);
-           //     startActivity(intent);
-         //   }
-      //  });
+        btnMqtt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MenuActivity.this, MapsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
