@@ -6,25 +6,26 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MyViewHolder extends RecyclerView.ViewHolder {
+import java.util.Locale;
 
-    // Holds references to individual item views
+import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+
+public class AsteroidViewHolder extends RecyclerView.ViewHolder {
+
     TextView title;
     TextView subtitle;
 
-    private static final String TAG = "TAGListOfItems, MyViewHolder";
+    private static final String TAG = "TAGAsteroidConspiracist, AsteroidViewHolder";
 
-    public MyViewHolder(View itemView) {
+    public AsteroidViewHolder(View itemView) {
         super(itemView);
         title = itemView.findViewById(R.id.title);
         subtitle = itemView.findViewById(R.id.subtitle);
     }
 
-    void bindValues(Item item, Boolean isSelected) {
-        // give values to the elements contained in the item view.
-        // formats the title's text color depending on the "isSelected" argument.
-        title.setText(item.getTitle());
-        subtitle.setText(item.getSubtitle());
+    void bindValues(Asteroid asteroid, Boolean isSelected) {
+        title.setText(asteroid.getName());
+        subtitle.setText(String.format(Locale.ENGLISH,"%f",asteroid.getDiameter()));
         if(isSelected) {
             title.setTextColor(Color.BLUE);
         } else {
