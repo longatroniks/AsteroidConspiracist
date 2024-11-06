@@ -79,7 +79,7 @@ public class ListActivity extends AppCompatActivity {
 
         // When MQTT connection is Successfully, topics can be published and subscribed. AG
         // CompletableFuture to manage the asynchronous connection instead of a callback interface
-        asteroidMqtt.connectToBroker().thenAccept(isConnected -> {
+        asteroidMqtt.connectToBroker("Publishing Asteroids").thenAccept(isConnected -> {
             if (isConnected) {
                 Log.d(TAG, "Successfully connected to the broker.");
                 bBrokerConnected=true;
