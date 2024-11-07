@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview;
 
 import android.graphics.Color;
 import android.view.View;
@@ -8,16 +8,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Locale;
 
+import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
-public class AsteroidViewHolder extends RecyclerView.ViewHolder {
+public class ViewHolder extends RecyclerView.ViewHolder {
 
     TextView title;
     TextView subtitle;
 
     private static final String TAG = "TAGAsteroidConspiracist, AsteroidViewHolder";
 
-    public AsteroidViewHolder(View itemView) {
+    public ViewHolder(View itemView) {
         super(itemView);
         title = itemView.findViewById(R.id.title);
         subtitle = itemView.findViewById(R.id.subtitle);

@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -23,6 +23,8 @@ import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import dte.masteriot.mdp.asteroidconspiracist.R;
 
 public class CompassActivity extends AppCompatActivity implements SensorEventListener {
     private static final String TAG = "CompassActivity";
