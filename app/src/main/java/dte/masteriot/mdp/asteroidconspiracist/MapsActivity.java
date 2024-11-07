@@ -39,6 +39,7 @@ import dte.masteriot.mdp.asteroidconspiracist.databinding.ActivityMapsBinding;
 
 //GoogleMap.OnMapClickListener: This means that the activity will handle map click events via the onMapClick method
 //, OnMapClickListener
+//improvements
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     String TAG="TAG_MDPMQTT";
 
