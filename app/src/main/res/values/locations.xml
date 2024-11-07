@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="locations">
+        <item>40.7128,-74.0060</item>
+        <item>34.0522,-118.2437</item>
+        <item>51.5074,-0.1278</item>
+        <item>48.8566,2.3522</item>
+        <item>35.6895,139.6917</item>
+        <item>40.45308913462788,-3.688292124610794</item>
+    </string-array>
+</resources>

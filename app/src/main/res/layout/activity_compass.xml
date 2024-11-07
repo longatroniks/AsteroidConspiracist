@@ -1,4 +1,3 @@
-<!-- activity_main.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -45,6 +44,19 @@
         android:text="Point towards your destination"
         android:textSize="25sp"
         android:textColor="#B0B0B0"
+        android:fontFamily="sans-serif" />
+
+    <!-- Texto para mostrar la distancia -->
+    <TextView
+        android:id="@+id/distance_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/info_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="Distance: Calculating..."
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
         android:fontFamily="sans-serif" />
 
 </RelativeLayout>
