@@ -33,7 +33,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.Random;
 
 import dte.masteriot.mdp.asteroidconspiracist.databinding.ActivityMapsBinding;
-
+//new features
 //api key: AIzaSyDG9MYlpjvE6Z7GQznwQbRoT9SD5zhcpdQ
 //SHA1: CE:77:53:71:14:FA:EE:5F:BC:99:75:F0:BD:A3:5B:33:54:7C:C0:E6
 
