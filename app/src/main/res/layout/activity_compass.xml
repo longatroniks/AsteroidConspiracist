@@ -1,0 +1,50 @@
+<!-- activity_main.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient">
+
+    <!-- Círculo de fondo para la brújula -->
+    <View
+        android:id="@+id/compass_background"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/circle_background" />
+
+    <!-- Texto de título superior -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="30dp"
+        android:text="Digital Compass"
+        android:textSize="28sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Imagen de la brújula -->
+    <ImageView
+        android:id="@+id/compass_image"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/compass"
+        android:rotation="0" /> <!-- Para rotación dinámica -->
+
+    <!-- Texto de información en la parte inferior -->
+    <TextView
+        android:id="@+id/info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/compass_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Point towards your destination"
+        android:textSize="25sp"
+        android:textColor="#B0B0B0"
+        android:fontFamily="sans-serif" />
+
+</RelativeLayout>
