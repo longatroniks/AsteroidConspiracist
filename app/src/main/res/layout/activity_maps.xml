@@ -8,7 +8,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".MapsActivity" >
+    android:background="@drawable/background_gradient"
+    tools:context=".activities.MapsActivity" >
 
     <Button
     android:id="@+id/setUFOLocation"

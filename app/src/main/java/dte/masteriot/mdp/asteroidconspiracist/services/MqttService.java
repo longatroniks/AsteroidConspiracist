@@ -1,13 +1,8 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.services;
 
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
@@ -15,32 +10,33 @@ import com.hivemq.client.mqtt.MqttClient;
 
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
-public class AsteroidMqtt
+public class MqttService
 {
-    String TAG="TAG_MDPMQTT";
+    String TAG;
     private String serverHost;
     private int serverPort;
-    //Topics for Asteroid:
-        //topic=asteroidName/Id
-        //topic=asteroidName/Distance
-        //topic=asteroidName/Diameter
-    //Topics for UFO:
-        //topic=UFO/Id/Location
 
-    private String publishingTopic="asteroid"; //Default topic for publishing
-    private String subscriptionTopic="asteroid/#"; //Default topic for subscription
+    private String publishingTopic;
+    private String subscriptionTopic;
 
     private Mqtt3AsyncClient client;
 
     private List<Asteroid> asteroidsToPublish;
 
-    AsteroidMqtt()
+    public MqttService()
     {
+        TAG = "TAG_MDPMQTT";
         serverHost="192.168.56.1";
         serverPort = 1883;
+        //topic=asteroidname/id
+        //topic=asteroidname/distance
+        //topic=asteroidname/diameter
+        publishingTopic = "asteroid";
+        subscriptionTopic = "asteroid/#";
+
     }
 
-    void createMQTTclient()
+    public void createMQTTclient()
     {
         Log.d(TAG, "createMQTTclient()");
         client = MqttClient.builder()
@@ -53,7 +49,7 @@ public class AsteroidMqtt
     }
 
     //CompletableFuture to manage the asynchronous connection
-    CompletableFuture<Boolean> connectToBroker(String messageTopicNewConnection)
+    public CompletableFuture<Boolean> connectToBroker()
     {
         Log.d(TAG, "connectToBroker()");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -76,8 +72,7 @@ public class AsteroidMqtt
                             future.complete(true); // indicate success
                             //TextViewConnection.setText("Connected to server and subscribed to topic");
                             subscribeToTopic();
-                            //publishMessage(this.publishingTopic,"New Connection:Hello Asteroid Conspiracist AG");
-                            publishMessage(this.publishingTopic,messageTopicNewConnection);
+                            publishMessage(this.publishingTopic,"Hello Asteroid AG");
                         }
                     });
         } else {
@@ -116,7 +111,7 @@ public class AsteroidMqtt
                     }
                 });
     }
-    void publishMessage(String publishingTopic, String Message) {
+    public void publishMessage(String publishingTopic, String Message) {
         Log.d(TAG, "publishMessage()");
         client.publishWith()
                 .topic(publishingTopic)
@@ -138,7 +133,7 @@ public class AsteroidMqtt
                 });
     }
 
-    void disconnectFromBroker() {
+    public void disconnectFromBroker() {
         if (client != null) {
             client.disconnect()
                     .whenComplete ((result, throwable) -> {
