@@ -1,13 +1,8 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.services;
 
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
@@ -15,7 +10,7 @@ import com.hivemq.client.mqtt.MqttClient;
 
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
-public class AsteroidMqtt
+public class MqttService
 {
     String TAG;
     private String serverHost;
@@ -28,7 +23,7 @@ public class AsteroidMqtt
 
     private List<Asteroid> asteroidsToPublish;
 
-    AsteroidMqtt()
+    public MqttService()
     {
         TAG = "TAG_MDPMQTT";
         serverHost="192.168.56.1";
@@ -41,7 +36,7 @@ public class AsteroidMqtt
 
     }
 
-    void createMQTTclient()
+    public void createMQTTclient()
     {
         Log.d(TAG, "createMQTTclient()");
         client = MqttClient.builder()
@@ -54,7 +49,7 @@ public class AsteroidMqtt
     }
 
     //CompletableFuture to manage the asynchronous connection
-    CompletableFuture<Boolean> connectToBroker()
+    public CompletableFuture<Boolean> connectToBroker()
     {
         Log.d(TAG, "connectToBroker()");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -116,7 +111,7 @@ public class AsteroidMqtt
                     }
                 });
     }
-    void publishMessage(String publishingTopic, String Message) {
+    public void publishMessage(String publishingTopic, String Message) {
         Log.d(TAG, "publishMessage()");
         client.publishWith()
                 .topic(publishingTopic)
@@ -138,7 +133,7 @@ public class AsteroidMqtt
                 });
     }
 
-    void disconnectFromBroker() {
+    public void disconnectFromBroker() {
         if (client != null) {
             client.disconnect()
                     .whenComplete ((result, throwable) -> {

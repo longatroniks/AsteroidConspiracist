@@ -1,14 +1,15 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import dte.masteriot.mdp.asteroidconspiracist.R;
 
 public class MainActivity extends AppCompatActivity {
 

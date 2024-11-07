@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import dte.masteriot.mdp.asteroidconspiracist.R;
 
 public class CompassActivity extends AppCompatActivity implements SensorEventListener {
     private static final String TAG = "CompassActivity";

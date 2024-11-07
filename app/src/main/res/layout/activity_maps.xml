@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:background="@drawable/background_gradient"
-    tools:context=".MapsActivity" >
+    tools:context=".activities.MapsActivity" >
 
     <Button
     android:id="@+id/setUFOLocation"

@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -17,6 +17,8 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
+import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.databinding.ActivityMapsBinding;
 
 
@@ -26,7 +28,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private Circle mapCircle;
     private ActivityMapsBinding binding;
-    private AsteroidMqtt UFOMqtt=new AsteroidMqtt();
+    private MqttService UFOMqtt = new MqttService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

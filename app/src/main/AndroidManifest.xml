@@ -33,23 +33,23 @@
             android:value="AIzaSyDG9MYlpjvE6Z7GQznwQbRoT9SD5zhcpdQ" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".activities.MapsActivity"
             android:exported="true"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".MenuActivity"
+            android:name=".activities.MenuActivity"
             android:exported="false" />
         <activity
-            android:name=".CompassActivity"
+            android:name=".activities.CompassActivity"
             android:exported="false" />
         <activity
-            android:name=".ListActivity"
+            android:name=".activities.ListActivity"
             android:exported="false" />
         <activity
-            android:name=".SecondActivity"
+            android:name=".activities.SecondActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
