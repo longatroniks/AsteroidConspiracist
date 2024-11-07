@@ -1,11 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape>
             <gradient
-                android:startColor="#0b0c10"
-                android:endColor="#1f2833"
+                android:startColor="#050607"
+                android:centerColor="#0d1115"
+                android:endColor="#0a0a0a"
                 android:angle="135"/>
         </shape>
     </item>
+    <!--
+       <item>
+        <bitmap
+               android:src="@drawable/star_pattern"
+               android:tileMode="clamp" android:gravity="center|fill_horizontal|fill_vertical" />
+            </item>
+    -->
 </layer-list>

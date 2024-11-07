@@ -17,25 +17,28 @@
         android:id="@+id/asteroid_image"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_centerInParent="true"
+        android:layout_marginTop="170dp"
+        android:layout_centerHorizontal="true"
         android:contentDescription="Asteroid"
         android:src="@drawable/asteroid_image"
         android:scaleType="centerInside"
         android:elevation="5dp" />
 
     <!-- Title Text Positioned Bottom Left -->
-    <Button
+    <TextView
         android:id="@+id/arrow_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginBottom="50dp"
         android:text="Asteroid\nConspiracist\n>"
         android:textColor="@android:color/white"
         android:textSize="28sp"
         android:fontFamily="monospace"
         android:textStyle="bold"
+        android:lineHeight="50dp"
         android:gravity="left"
         />
 
