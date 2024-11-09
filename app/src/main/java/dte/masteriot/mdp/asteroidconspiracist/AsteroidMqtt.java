@@ -28,8 +28,7 @@ public class AsteroidMqtt
         //topic=UFO/Id/Location
 
     private String publishingTopic="asteroid"; //Default topic for publishing
-    private String subscriptionTopic="asteroid/#"; //Default topic for subscription
-
+    private String subscriptionTopic="UFO/#"; //Default topic for subscription
     private Mqtt3AsyncClient client;
 
     private List<Asteroid> asteroidsToPublish;
@@ -91,6 +90,7 @@ public class AsteroidMqtt
     void subscribeToTopic()
     {
         Log.d(TAG, "subscribeToTopic()");
+
         client.subscribeWith()
                 .topicFilter(subscriptionTopic)
                 .callback(publish -> {
@@ -99,6 +99,7 @@ public class AsteroidMqtt
                     // "publish" is an object of class Mqtt3Publish, which can be used to
                     // obtain the information of the received message
                     String payloadString = new String(publish.getPayloadAsBytes());
+
                     //TextViewSubscribed.setText("(topic:"+subscriptionTopic+"):"+payloadString);
 
                 })
@@ -115,7 +116,10 @@ public class AsteroidMqtt
 
                     }
                 });
+
     }
+
+
     void publishMessage(String publishingTopic, String Message) {
         Log.d(TAG, "publishMessage()");
         client.publishWith()

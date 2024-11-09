@@ -30,6 +30,7 @@ import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import dte.masteriot.mdp.asteroidconspiracist.databinding.ActivityMapsBinding;
@@ -53,6 +54,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient fusedLocationClient;
     // Store the User Location
     private LatLng currentLatLngUser;
+    //Store the
+    public static ArrayList<LatLng> UfoLocationArray=new ArrayList<>() ;
 
     private ActivityMapsBinding binding;
     private AsteroidMqtt UFOMqtt=new AsteroidMqtt();
@@ -103,10 +106,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         float zoomLevel = 15.0f; // Zoom level between 2.0f (world view) to 21.0f (street level)
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomLevel));
+        //Get User Location
+        getCurrentLocation(new  LocationCallback()
+        {
+            @Override
+            public void onLocationRetrieved(LatLng userLocation) {
+                // Once location is retrieved, execute the following methods:
+                //
+                mMap.addMarker(new MarkerOptions().position(userLocation).title("Marker in User's Current Location "));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel));
+            }
+        });
 
         // After the map is loaded, you register the activity as a click listener
         // Register the click listener
@@ -126,14 +136,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Once location is retrieved, execute the following methods:
                 //
                 //Draw Location
-                drawLocation(currentLatLngUser);
+                drawLocation(latLng);
                 //Publish the User location
-                publishLocationMQTT(currentLatLngUser);
+                publishLocationMQTT(latLng);
+                UfoLocationArray.add(latLng);
+
             }
         });
     }
+
+    public void listingUFOLocation(View view)
+    {
+        for (int i=0; i<UfoLocationArray.size();i++)
+        {
+            drawLocation(UfoLocationArray.get(i));
+        }
+
+    }
     public void publishLocationMQTT(LatLng location)
     {
+
         String publishingTopicCurrentLocation;
         String messageTopic;
         Random random=new Random();
