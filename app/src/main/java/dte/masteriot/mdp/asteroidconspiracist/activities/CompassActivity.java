@@ -32,6 +32,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private Sensor magnetometer;
     private ImageView compassImage;
     private TextView distanceText;
+    private TextView closestCityText;
+    private TextView closestShelterText;
     private float[] gravity;
     private float[] geomagnetic;
     private float azimuth = 0f;
@@ -50,6 +52,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         setContentView(R.layout.activity_compass);
         compassImage = findViewById(R.id.compass_image);
         distanceText = findViewById(R.id.distance_text);
+        closestCityText = findViewById(R.id.closest_city_text);
+        closestShelterText = findViewById(R.id.closest_shelter_text);
 
         // Configuración del sensor
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -108,6 +112,9 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     private Location findClosestLocation(double latitude, double longitude) {
         List<Location> locations = readLocationsFromXML();
+        List<String> cities = readCitiesFromXML();
+        List<String> shelters = readSheltersFromXML();
+
         if (locations.isEmpty()) {
             Log.e(TAG, "No se encontraron ubicaciones en el archivo.");
             return null;
@@ -119,22 +126,40 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         Location closestLocation = null;
         float minDistance = Float.MAX_VALUE;
+        String closestCity = null;
+        String closestShelter = null;
 
         Log.d(TAG, "Comenzando la búsqueda de la ubicación más cercana...");
 
-        for (Location loc : locations) {
+        for (int i = 0; i < locations.size(); i++) {
+            Location loc = locations.get(i);
             float distance = currentLocation.distanceTo(loc);
             Log.d(TAG, "Ubicación leída: Latitud = " + loc.getLatitude() + ", Longitud = " + loc.getLongitude() + ", Distancia = " + distance + " metros");
 
             if (distance < minDistance) {
                 minDistance = distance;
                 closestLocation = loc;
+                closestCity = cities.get(i);
+                closestShelter = shelters.get(i);
                 Log.d(TAG, "Nueva ubicación más cercana: Latitud = " + loc.getLatitude() + ", Longitud = " + loc.getLongitude() + ", Distancia = " + minDistance + " metros");
+                Log.d(TAG, "Ciudad más cercana: " + closestCity + ", Shelter más cercano: " + closestShelter);
             }
+        }
+
+        // Actualizar los TextView en la interfaz
+        if (closestCity != null && closestShelter != null) {
+            String finalClosestCity = closestCity;
+            String finalClosestShelter = closestShelter;
+            runOnUiThread(() -> {
+                closestCityText.setText("City: " + finalClosestCity);
+                closestShelterText.setText("Shelter name: " + finalClosestShelter);
+            });
         }
 
         Log.d(TAG, "Ubicación más cercana final: Latitud = " + (closestLocation != null ? closestLocation.getLatitude() : "N/A") +
                 ", Longitud = " + (closestLocation != null ? closestLocation.getLongitude() : "N/A"));
+        Log.d(TAG, "Ciudad más cercana final: " + (closestCity != null ? closestCity : "N/A") +
+                ", Shelter más cercano final: " + (closestShelter != null ? closestShelter : "N/A"));
 
         return closestLocation;
     }
@@ -142,9 +167,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private List<Location> readLocationsFromXML() {
         List<Location> locations = new ArrayList<>();
         String[] locationArray = getResources().getStringArray(R.array.locations);
+
         for (String loc : locationArray) {
             String[] parts = loc.split(",");
-            if (parts.length == 2) {
+            if (parts.length == 4) { // Verificar que se tengan latitud, longitud, ciudad y shelter
                 Location location = new Location("file");
                 location.setLatitude(Double.parseDouble(parts[0]));
                 location.setLongitude(Double.parseDouble(parts[1]));
@@ -153,6 +179,34 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             }
         }
         return locations;
+    }
+
+    private List<String> readCitiesFromXML() {
+        List<String> cities = new ArrayList<>();
+        String[] locationArray = getResources().getStringArray(R.array.locations);
+
+        for (String loc : locationArray) {
+            String[] parts = loc.split(",");
+            if (parts.length == 4) {
+                cities.add(parts[2]); // Agregar la ciudad a la lista
+                Log.d(TAG, "Ciudad cargada: " + parts[2]);
+            }
+        }
+        return cities;
+    }
+
+    private List<String> readSheltersFromXML() {
+        List<String> shelters = new ArrayList<>();
+        String[] locationArray = getResources().getStringArray(R.array.locations);
+
+        for (String loc : locationArray) {
+            String[] parts = loc.split(",");
+            if (parts.length == 4) {
+                shelters.add(parts[3]); // Agregar el nombre del shelter a la lista
+                Log.d(TAG, "Shelter cargado: " + parts[3]);
+            }
+        }
+        return shelters;
     }
 
     @Override

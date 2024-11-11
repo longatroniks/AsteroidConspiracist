@@ -59,4 +59,30 @@
         android:textColor="#FFFFFF"
         android:fontFamily="sans-serif" />
 
+    <!-- Texto para mostrar la ciudad más cercana -->
+    <TextView
+        android:id="@+id/closest_city_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/distance_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="Closest City: N/A"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif" />
+
+    <!-- Texto para mostrar el shelter más cercano -->
+    <TextView
+        android:id="@+id/closest_shelter_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/closest_city_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="Closest Shelter: N/A"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif" />
+
 </RelativeLayout>
