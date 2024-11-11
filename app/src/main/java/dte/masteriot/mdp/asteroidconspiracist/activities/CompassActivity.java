@@ -1,6 +1,7 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -111,12 +112,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private Location findClosestLocation(double latitude, double longitude) {
-        List<Location> locations = readLocationsFromXML();
-        List<String> cities = readCitiesFromXML();
-        List<String> shelters = readSheltersFromXML();
+        List<Object[]> sheltersData = readSheltersDataFromPreferences();
 
-        if (locations.isEmpty()) {
-            Log.e(TAG, "No se encontraron ubicaciones en el archivo.");
+        if (sheltersData.isEmpty()) {
+            Log.e(TAG, "No se encontraron datos de shelters en SharedPreferences.");
             return null;
         }
 
@@ -131,16 +130,19 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         Log.d(TAG, "Comenzando la búsqueda de la ubicación más cercana...");
 
-        for (int i = 0; i < locations.size(); i++) {
-            Location loc = locations.get(i);
+        for (Object[] shelterInfo : sheltersData) {
+            String shelterName = (String) shelterInfo[0];
+            String cityName = (String) shelterInfo[1];
+            Location loc = (Location) shelterInfo[2];
+
             float distance = currentLocation.distanceTo(loc);
             Log.d(TAG, "Ubicación leída: Latitud = " + loc.getLatitude() + ", Longitud = " + loc.getLongitude() + ", Distancia = " + distance + " metros");
 
             if (distance < minDistance) {
                 minDistance = distance;
                 closestLocation = loc;
-                closestCity = cities.get(i);
-                closestShelter = shelters.get(i);
+                closestCity = cityName;
+                closestShelter = shelterName;
                 Log.d(TAG, "Nueva ubicación más cercana: Latitud = " + loc.getLatitude() + ", Longitud = " + loc.getLongitude() + ", Distancia = " + minDistance + " metros");
                 Log.d(TAG, "Ciudad más cercana: " + closestCity + ", Shelter más cercano: " + closestShelter);
             }
@@ -164,49 +166,43 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         return closestLocation;
     }
 
-    private List<Location> readLocationsFromXML() {
-        List<Location> locations = new ArrayList<>();
-        String[] locationArray = getResources().getStringArray(R.array.locations);
 
-        for (String loc : locationArray) {
-            String[] parts = loc.split(",");
-            if (parts.length == 4) { // Verificar que se tengan latitud, longitud, ciudad y shelter
-                Location location = new Location("file");
-                location.setLatitude(Double.parseDouble(parts[0]));
-                location.setLongitude(Double.parseDouble(parts[1]));
-                locations.add(location);
-                Log.d(TAG, "Ubicación cargada desde XML: Latitud = " + location.getLatitude() + ", Longitud = " + location.getLongitude());
+
+    private List<Object[]> readSheltersDataFromPreferences() {
+        List<Object[]> sheltersData = new ArrayList<>();
+        SharedPreferences sharedPreferences = getSharedPreferences("ShelterData", MODE_PRIVATE);
+        int shelterCount = sharedPreferences.getInt("shelter_count", 0);
+
+        for (int i = 1; i <= shelterCount; i++) {
+            String shelterEntry = sharedPreferences.getString("shelter_" + i, null);
+            if (shelterEntry != null) {
+                // Formato esperado: "shelterName, cityName, latitude, longitude"
+                String[] parts = shelterEntry.split(", ");
+                if (parts.length == 4) {
+                    try {
+                        String shelterName = parts[0].trim();
+                        String cityName = parts[1].trim();
+                        double latitude = Double.parseDouble(parts[2].trim());
+                        double longitude = Double.parseDouble(parts[3].trim());
+
+                        // Crear la ubicación
+                        Location location = new Location("shared_prefs");
+                        location.setLatitude(latitude);
+                        location.setLongitude(longitude);
+
+                        // Añadir la información a la lista
+                        sheltersData.add(new Object[]{shelterName, cityName, location});
+
+                        Log.d(TAG, "Datos cargados desde SharedPreferences: Shelter = " + shelterName + ", Ciudad = " + cityName + ", Latitud = " + latitude + ", Longitud = " + longitude);
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Error al convertir a número: " + e.getMessage());
+                    }
+                } else {
+                    Log.e(TAG, "Formato inesperado de entrada: " + shelterEntry);
+                }
             }
         }
-        return locations;
-    }
-
-    private List<String> readCitiesFromXML() {
-        List<String> cities = new ArrayList<>();
-        String[] locationArray = getResources().getStringArray(R.array.locations);
-
-        for (String loc : locationArray) {
-            String[] parts = loc.split(",");
-            if (parts.length == 4) {
-                cities.add(parts[2]); // Agregar la ciudad a la lista
-                Log.d(TAG, "Ciudad cargada: " + parts[2]);
-            }
-        }
-        return cities;
-    }
-
-    private List<String> readSheltersFromXML() {
-        List<String> shelters = new ArrayList<>();
-        String[] locationArray = getResources().getStringArray(R.array.locations);
-
-        for (String loc : locationArray) {
-            String[] parts = loc.split(",");
-            if (parts.length == 4) {
-                shelters.add(parts[3]); // Agregar el nombre del shelter a la lista
-                Log.d(TAG, "Shelter cargado: " + parts[3]);
-            }
-        }
-        return shelters;
+        return sheltersData;
     }
 
     @Override

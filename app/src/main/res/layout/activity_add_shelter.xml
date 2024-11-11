@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <EditText
+        android:id="@+id/shelter_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre del Shelter"
+        android:layout_marginTop="16dp" />
+
+    <EditText
+        android:id="@+id/city_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/shelter_name_edit_text"
+        android:layout_marginTop="8dp"
+        android:hint="Ciudad de origen" />
+
+    <Button
+        android:id="@+id/publish_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/city_name_edit_text"
+        android:layout_marginTop="16dp"
+        android:text="Publicar Shelter"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/show_list_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/publish_button"
+        android:layout_marginTop="16dp"
+        android:text="Mostrar Lista de Shelters"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/location_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/show_list_button"
+        android:layout_marginTop="16dp"
+        android:text="Información de publicación aparecerá aquí"
+        android:textSize="16sp" />
+
+    <ListView
+        android:id="@+id/shelters_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/location_text_view"
+        android:layout_marginTop="16dp" />
+</RelativeLayout>

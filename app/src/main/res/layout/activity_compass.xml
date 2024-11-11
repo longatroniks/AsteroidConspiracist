@@ -67,7 +67,7 @@
         android:layout_below="@id/distance_text"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
-        android:text="Closest City: N/A"
+        android:text="City: N/A"
         android:textSize="18sp"
         android:textColor="#FFFFFF"
         android:fontFamily="sans-serif" />
@@ -80,7 +80,7 @@
         android:layout_below="@id/closest_city_text"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
-        android:text="Closest Shelter: N/A"
+        android:text="Shelter name: N/A"
         android:textSize="18sp"
         android:textColor="#FFFFFF"
         android:fontFamily="sans-serif" />
