@@ -1,9 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.AsteroidConspiracist" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- Tema envolvente principal -->
+    <style name="Theme.AsteroidConspiracist" parent="Theme.AppCompat">
+        <!-- Aquí no se definen colores específicos ya que se aplicarán desde los temas Light y Dark -->
+        <!-- Puedes añadir configuraciones globales aquí si las necesitas -->
     </style>
 
-    <style name="Theme.AsteroidConspiracist" parent="Base.Theme.AsteroidConspiracist" />
+    <!-- Tema claro -->
+    <style name="LightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryDark">#3700B3</item>
+        <item name="colorAccent">#03DAC5</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:statusBarColor">#6200EE</item>
+    </style>
 </resources>

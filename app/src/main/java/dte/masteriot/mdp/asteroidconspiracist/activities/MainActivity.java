@@ -10,6 +10,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
+import dte.masteriot.mdp.asteroidconspiracist.utils.ThemeManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,6 +18,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        // Inicializa ThemeManager si no se ha hecho ya
+        ThemeManager.initialize(this);
+
+        // Aplica el tema según el estado de ThemeManager
+        if (ThemeManager.isDarkMode()) {
+            setTheme(R.style.DarkTheme);
+        } else {
+            setTheme(R.style.LightTheme);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

@@ -7,11 +7,14 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
+import dte.masteriot.mdp.asteroidconspiracist.utils.ThemeManager;
 
 public class MenuActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 

@@ -1,7 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.AsteroidConspiracist" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <!-- Tema oscuro -->
+    <style name="DarkTheme" parent="Theme.AppCompat">
+        <!-- Colores personalizados para Dark Mode -->
+        <item name="colorPrimary">#BB86FC</item>
+        <item name="colorPrimaryDark">#3700B3</item>
+        <item name="colorAccent">#03DAC5</item>
+        <item name="android:windowBackground">#121212</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#3700B3</item>
     </style>
 </resources>
