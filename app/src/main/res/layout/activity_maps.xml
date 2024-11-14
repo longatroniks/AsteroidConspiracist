@@ -8,9 +8,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="0dp"
-    android:background="#333333"
-    tools:context=".MapsActivity" >
+    android:background="@drawable/background_gradient"
+    tools:context=".activities.MapsActivity" >
 
     <LinearLayout
         android:layout_width="wrap_content"

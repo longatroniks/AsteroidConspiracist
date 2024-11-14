@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,15 +11,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
-public class AsteroidAdapter extends RecyclerView.Adapter<AsteroidViewHolder> {
+public class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
     private static final String TAG = "TAGAsteroidConspiracist, MyAdapter";
     private final List<Asteroid> asteroids;
     private SelectionTracker<Long> selectionTracker;
 
-    public AsteroidAdapter(List<Asteroid> asteroids) {
+    public Adapter(List<Asteroid> asteroids) {
         super();
         Log.d(TAG, "AsteroidAdapter() called");
         this.asteroids = asteroids;
@@ -27,13 +28,13 @@ public class AsteroidAdapter extends RecyclerView.Adapter<AsteroidViewHolder> {
 
     @NonNull
     @Override
-    public AsteroidViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
-        return new AsteroidViewHolder(v);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(AsteroidViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         Asteroid asteroid = asteroids.get(position);
         Long itemKey = asteroid.getKey();
         boolean isItemSelected = selectionTracker != null && selectionTracker.isSelected(itemKey);

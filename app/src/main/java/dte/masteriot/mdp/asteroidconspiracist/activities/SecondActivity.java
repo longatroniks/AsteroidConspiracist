@@ -1,10 +1,12 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import dte.masteriot.mdp.asteroidconspiracist.R;
 
 public class SecondActivity extends AppCompatActivity {
 

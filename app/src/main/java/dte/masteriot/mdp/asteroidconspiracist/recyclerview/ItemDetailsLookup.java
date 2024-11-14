@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -7,22 +7,15 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
-final class AsteroidItemDetailsLookup extends ItemDetailsLookup<Long> {
-
-    // From [https://developer.android.com/reference/androidx/recyclerview/selection/ItemDetailsLookup]:
-    // The Selection library calls the method getItemDetails(MotionEvent) of an object of this class
-    // when it needs access to information about the area and/or ItemDetailsLookup.ItemDetails
-    // under a MotionEvent
+public final class ItemDetailsLookup extends androidx.recyclerview.selection.ItemDetailsLookup<Long> {
 
     private static final String TAG = "TAGListOfItems, MyItemDetailsLookup";
-
     private final RecyclerView mRecyclerView;
 
     @SuppressLint("LongLogTag")
-    AsteroidItemDetailsLookup(RecyclerView recyclerView) {
+    public ItemDetailsLookup(RecyclerView recyclerView) {
         Log.d(TAG, "MyItemDetailsLookup() called");
         mRecyclerView = recyclerView;
     }
@@ -35,9 +28,9 @@ final class AsteroidItemDetailsLookup extends ItemDetailsLookup<Long> {
         View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
         if (view != null) {
             RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(view);
-            if (holder instanceof AsteroidViewHolder) {
+            if (holder instanceof ViewHolder) {
                 int positionOfTheHolder = holder.getAbsoluteAdapterPosition();
-                Long keyOfTheHolder = ((AsteroidAdapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
+                Long keyOfTheHolder = ((Adapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
 
                 ItemDetails<Long> itemDetails = new ItemDetails<Long>() {
                     @Override
@@ -56,5 +49,4 @@ final class AsteroidItemDetailsLookup extends ItemDetailsLookup<Long> {
         }
         return null;
     }
-
 }

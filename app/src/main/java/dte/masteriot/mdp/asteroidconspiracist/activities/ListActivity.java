@@ -1,6 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist;
-
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.selection.ItemKeyProvider;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -24,22 +21,29 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.Adapter;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.ItemDetailsLookup;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.ItemKeyProvider;
+import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.OnItemActivatedListener;
+import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
 import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class ListActivity extends AppCompatActivity {
 
     // App-specific dataset:
-    private static final NeoWsAPIClient NEO_WS_API_CLIENT = new NeoWsAPIClient();
+    private static final NeoWsAPIService NEO_WS_API_CLIENT = new NeoWsAPIService();
     private RecyclerView recyclerView;
-    private AsteroidAdapter recyclerViewAdapter;
+    private Adapter adapter;
     private SelectionTracker<Long> tracker;
-    private final AsteroidOnItemActivatedListener asteroidOnItemActivatedListener =
-            new AsteroidOnItemActivatedListener(this, NEO_WS_API_CLIENT);
+    private final OnItemActivatedListener onItemActivatedListener =
+            new OnItemActivatedListener(this, NEO_WS_API_CLIENT);
     private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
     String TAG;
-    AsteroidMqtt asteroidMqtt=new AsteroidMqtt();
+    MqttService mqttService =new MqttService();
     boolean bBrokerConnected=false;
 
     @Override
@@ -49,8 +53,8 @@ public class ListActivity extends AppCompatActivity {
 
         // Prepare the RecyclerView:
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerViewAdapter = new AsteroidAdapter(new ArrayList<>()); // Initialize with an empty list
-        recyclerView.setAdapter(recyclerViewAdapter);
+        adapter = new Adapter(new ArrayList<>()); // Initialize with an empty list
+        recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Choose the layout manager
@@ -60,12 +64,12 @@ public class ListActivity extends AppCompatActivity {
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
-                new AsteroidItemKeyProvider(ItemKeyProvider.SCOPE_MAPPED, recyclerView),
-                new AsteroidItemDetailsLookup(recyclerView),
+                new ItemKeyProvider(androidx.recyclerview.selection.ItemKeyProvider.SCOPE_MAPPED, recyclerView),
+                new ItemDetailsLookup(recyclerView),
                 StorageStrategy.createLongStorage())
-                .withOnItemActivatedListener(asteroidOnItemActivatedListener)
+                .withOnItemActivatedListener(onItemActivatedListener)
                 .build();
-        recyclerViewAdapter.setSelectionTracker(tracker);
+        adapter.setSelectionTracker(tracker);
 
         if (savedInstanceState != null) {
             tracker.onRestoreInstanceState(savedInstanceState);
@@ -75,11 +79,8 @@ public class ListActivity extends AppCompatActivity {
         fetchAsteroids();
 
         //MQTT Connection AG
-        asteroidMqtt.createMQTTclient();
-
-        // When MQTT connection is Successfully, topics can be published and subscribed. AG
-        // CompletableFuture to manage the asynchronous connection instead of a callback interface
-        asteroidMqtt.connectToBroker("Publishing Asteroids").thenAccept(isConnected -> {
+        mqttService.createMQTTclient();
+        mqttService.connectToBroker().thenAccept(isConnected -> {
             if (isConnected) {
                 Log.d(TAG, "Successfully connected to the broker.");
                 bBrokerConnected=true;
@@ -100,29 +101,21 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //MQTT Disconnection
-        asteroidMqtt.disconnectFromBroker();
-        //
+        mqttService.disconnectFromBroker();
     }
 
     // Fetch asteroids from the API
     private void fetchAsteroids() {
         executorService.execute(() -> {
             try {
-                // Make the API call and parse the response
                 String jsonResponse = NEO_WS_API_CLIENT.getAsteroids();
                 Log.d(TAG,"JSONResponse right hya: " + jsonResponse);
                 List<Asteroid> asteroids = AsteroidParser.parseAsteroids(jsonResponse);
 
                 runOnUiThread(() -> {
-                    if (asteroids != null) {
-                        recyclerViewAdapter.updateData(asteroids); // Method to update the adapter with new data
-                        if (bBrokerConnected)
-                            asteroidMqtt.PublishAsteroidInfo(asteroids);// Publishing the Asteroid topic if the broker is connected and there is a new update AG
-
-                    } else {
-                        Toast.makeText(ListActivity.this, "Failed to fetch asteroids", Toast.LENGTH_SHORT).show();
-                    }
+                    adapter.updateData(asteroids);
+                    if (bBrokerConnected)
+                        mqttService.PublishAsteroidInfo(asteroids);
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -130,8 +123,6 @@ public class ListActivity extends AppCompatActivity {
             }
         });
     }
-
-    // ------ Buttons' on-click listeners ------ //
 
     public void listLayout(View view) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -159,8 +150,8 @@ public class ListActivity extends AppCompatActivity {
     public void UFOmap (View view)
     {
         String text = "third activity pressing button\n";
-        double latitude = 37.422;  // Replace with your desired latitude
-        double longitude = -122.084; // Replace with your desired longitude
+        double latitude = 37.422;
+        double longitude = -122.084;
         Intent intent = new Intent(this, MapsActivity.class);
 
         intent.putExtra("latitude", latitude);
