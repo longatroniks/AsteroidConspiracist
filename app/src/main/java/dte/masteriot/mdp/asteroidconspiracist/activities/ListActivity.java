@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,12 +23,12 @@ import java.util.concurrent.Executors;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListItemDetailsLookup;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyProvider;
-import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
+import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
+import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class ListActivity extends BaseActivity {
 
@@ -37,13 +36,10 @@ public class ListActivity extends BaseActivity {
     private RecyclerView recyclerView;
     private ListAdapter listAdapter;
     private SelectionTracker<Long> tracker;
-    private final OnItemActivatedListener onItemActivatedListener =
-            new OnItemActivatedListener(this, NEO_WS_API_CLIENT);
-    private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
-
-    String TAG ="DENZEL CURRY";
-    MqttService mqttService =new MqttService();
-    boolean bBrokerConnected=false;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private MqttService mqttService = new MqttService();
+    private boolean bBrokerConnected = false;
+    private static final String TAG = "AsteroidConspiracist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +50,9 @@ public class ListActivity extends BaseActivity {
         contentFrame.addView(contentView);
 
         recyclerView = findViewById(R.id.recyclerView);
-        listAdapter = new ListAdapter(new ArrayList<>()); // Initialize with an empty list
+        listAdapter = new ListAdapter(new ArrayList<>());
         recyclerView.setAdapter(listAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         tracker = new SelectionTracker.Builder<>(
@@ -66,29 +61,21 @@ public class ListActivity extends BaseActivity {
                 new ItemKeyProvider(androidx.recyclerview.selection.ItemKeyProvider.SCOPE_MAPPED, recyclerView),
                 new ListItemDetailsLookup(recyclerView),
                 StorageStrategy.createLongStorage())
-                .withOnItemActivatedListener(onItemActivatedListener)
+                .withOnItemActivatedListener(new OnItemActivatedListener(this, listAdapter))
                 .build();
+
         listAdapter.setSelectionTracker(tracker);
 
         if (savedInstanceState != null) {
             tracker.onRestoreInstanceState(savedInstanceState);
         }
 
-        // Fetch data from the NeoWs API
         fetchAsteroids();
-
-        //MQTT Connection AG
         mqttService.createMQTTclient();
         mqttService.connectToBroker().thenAccept(isConnected -> {
-            if (isConnected) {
-                Log.d(TAG, "Successfully connected to the broker.");
-                bBrokerConnected=true;
-            } else {
-                Log.d(TAG, "Failed to connect to the broker.");
-                bBrokerConnected=false;
-            }
+            bBrokerConnected = isConnected;
+            Log.d(TAG, isConnected ? "Connected to the broker." : "Failed to connect to the broker.");
         });
-        //
     }
 
     @Override
@@ -103,18 +90,18 @@ public class ListActivity extends BaseActivity {
         mqttService.disconnectFromBroker();
     }
 
-    // Fetch asteroids from the API
     private void fetchAsteroids() {
-        NEO_WS_API_CLIENT.getAsteroids(new NeoWsAPIService.NeoWsAPIResponse() {
+        NEO_WS_API_CLIENT.fetchAndStoreAsteroids(this, new NeoWsAPIService.NeoWsAPIResponse() {
             @Override
-            public void onResponse(String jsonResponse) {
-                List<Asteroid> asteroids = AsteroidParser.parseAsteroids(jsonResponse);
-
-                // Update RecyclerView on the main thread
+            public void onResponse(boolean isFromCache) {
+                List<Asteroid> asteroids = AsteroidRepository.getInstance().getAsteroidList();
                 runOnUiThread(() -> {
                     listAdapter.updateData(asteroids);
                     if (bBrokerConnected) {
                         mqttService.PublishAsteroidInfo(asteroids);
+                    }
+                    if (isFromCache) {
+                        Toast.makeText(ListActivity.this, "Loaded data from saved cache.", Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -127,17 +114,17 @@ public class ListActivity extends BaseActivity {
         });
     }
 
-    public void listLayout(View view) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
-
-    public void gridLayout(View view) {
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+    private void updateAsteroidList(List<Asteroid> asteroidList) {
+        runOnUiThread(() -> {
+            listAdapter.updateData(asteroidList);
+            if (bBrokerConnected) {
+                mqttService.PublishAsteroidInfo(asteroidList);
+            }
+        });
     }
 
     public void seeCurrentSelection(View view) {
         Iterator<Long> iteratorSelectedItemsKeys = tracker.getSelection().iterator();
-
         while (iteratorSelectedItemsKeys.hasNext()) {
             Long selectedKey = iteratorSelectedItemsKeys.next();
             Asteroid selectedAsteroid = listAdapter.getAsteroidByKey(selectedKey);
@@ -148,25 +135,13 @@ public class ListActivity extends BaseActivity {
                 i.putExtra("asteroid_max_diameter", selectedAsteroid.getMaxDiameter());
                 i.putExtra("asteroid_min_diameter", selectedAsteroid.getMinDiameter());
                 i.putExtra("asteroid_absolute_magnitude", selectedAsteroid.getAbsoluteMagnitude());
+                i.putExtra("asteroid_is_hazardous", selectedAsteroid.isPotentiallyHazardous());
                 i.putExtra("asteroid_orbit_id", selectedAsteroid.getOrbitId());
                 i.putExtra("asteroid_semi_major_axis", selectedAsteroid.getSemiMajorAxis());
+                i.putExtra("asteroid_velocity", selectedAsteroid.getVelocity());
+                i.putExtra("asteroid_nasa_jpl_url", selectedAsteroid.getNasaJplUrl());
                 startActivity(i);
             }
         }
-    }
-
-
-    public void UFOmap (View view)
-    {
-        String text = "third activity pressing button\n";
-        double latitude = 37.422;
-        double longitude = -122.084;
-        Intent intent = new Intent(this, MapsActivity.class);
-
-        intent.putExtra("latitude", latitude);
-        intent.putExtra("longitude", longitude);
-        intent.putExtra("text", text);
-        startActivity(intent);
-
     }
 }

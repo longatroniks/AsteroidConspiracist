@@ -36,7 +36,6 @@
         android:text="Asteroid\nConspiracist\n>"
         android:textColor="@android:color/white"
         android:textSize="28sp"
-        android:fontFamily="monospace"
         android:textStyle="bold"
         android:lineHeight="50dp"
         android:gravity="left"

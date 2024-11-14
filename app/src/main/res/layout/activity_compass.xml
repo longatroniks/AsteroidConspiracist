@@ -12,13 +12,11 @@
         android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:padding="30dp"
         android:text="Digital Compass"
         android:textSize="28sp"
-        android:textColor="#FFFFFF"
-        android:fontFamily="sans-serif-medium" />
+        android:textColor="?attr/colorOnPrimary"
+        />
+
 
     <ImageView
         android:id="@+id/compass_image"
@@ -37,6 +35,5 @@
         android:layout_marginTop="16dp"
         android:text="Point towards your destination"
         android:textSize="25sp"
-        android:textColor="#B0B0B0"
-        android:fontFamily="sans-serif" />
+        android:textColor="#B0B0B0"/>
 </RelativeLayout>

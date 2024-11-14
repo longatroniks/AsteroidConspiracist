@@ -6,27 +6,31 @@
     android:layout_height="match_parent"
     tools:context=".activities.ListActivity">
 
+    <!-- RecyclerView to display list items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/seeselectionbutton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
+    <!-- Button for current selection action -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/seeselectionbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:text="See current selection"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cornerRadius="8dp"
         android:onClick="seeCurrentSelection"
+        android:textColor="?attr/colorOnSurface"
+        android:backgroundTint="?attr/colorPrimary"
         />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

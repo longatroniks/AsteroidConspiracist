@@ -10,32 +10,48 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 
 import dte.masteriot.mdp.asteroidconspiracist.activities.ItemDetailsActivity;
-import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
+import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
 
 public class OnItemActivatedListener implements androidx.recyclerview.selection.OnItemActivatedListener<Long> {
 
-    private static final String TAG = "TAGAsteroidConspiracist, AsteroidOnItemActivatedListener";
-
+    private static final String TAG = "TAGAsteroidConspiracist, OnItemActivatedListener";
     private final Context context;
-    private NeoWsAPIService neoWsAPIClient;
+    private final ListAdapter listAdapter;
 
-    public OnItemActivatedListener(Context context, NeoWsAPIService ds) {
+    public OnItemActivatedListener(Context context, ListAdapter listAdapter) {
         this.context = context;
-        this.neoWsAPIClient = ds;
+        this.listAdapter = listAdapter;
     }
 
     @SuppressLint("LongLogTag")
     @Override
-    public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails itemdetails,
+    public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> itemDetails,
                                    @NonNull MotionEvent e) {
 
-        Log.d(TAG, "Clicked item with position = " + itemdetails.getPosition()
-                + " and key = " + itemdetails.getSelectionKey());
+        Log.d(TAG, "Item clicked at position: " + itemDetails.getPosition());
 
-        Intent i = new Intent(context, ItemDetailsActivity.class);
-        i.putExtra("text", "Clicked item with position = " + itemdetails.getPosition()
-                + " and key = " + itemdetails.getSelectionKey());
-        context.startActivity(i);
+        Asteroid asteroid = listAdapter.getAsteroidByKey(itemDetails.getSelectionKey());
+
+        if (asteroid != null) {
+            Intent intent = new Intent(context, ItemDetailsActivity.class);
+            // Add all asteroid details to the intent
+            intent.putExtra("asteroid_name", asteroid.getName());
+            intent.putExtra("asteroid_distance", asteroid.getDistance());
+            intent.putExtra("asteroid_max_diameter", asteroid.getMaxDiameter());
+            intent.putExtra("asteroid_min_diameter", asteroid.getMinDiameter());
+            intent.putExtra("asteroid_max_diameter_meters", asteroid.getMaxDiameterMeters());
+            intent.putExtra("asteroid_min_diameter_meters", asteroid.getMinDiameterMeters());
+            intent.putExtra("asteroid_velocity", asteroid.getVelocity());
+            intent.putExtra("asteroid_absolute_magnitude", asteroid.getAbsoluteMagnitude());
+            intent.putExtra("asteroid_is_hazardous", asteroid.isPotentiallyHazardous());
+            intent.putExtra("asteroid_orbit_id", asteroid.getOrbitId());
+            intent.putExtra("asteroid_semi_major_axis", asteroid.getSemiMajorAxis());
+            intent.putExtra("asteroid_nasa_jpl_url", asteroid.getNasaJplUrl());
+
+            context.startActivity(intent);
+        }
+
         return true;
     }
 }
