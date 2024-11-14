@@ -78,17 +78,18 @@ public class ListActivity extends AppCompatActivity {
         // Fetch data from the NeoWs API
         fetchAsteroids();
 
-        //MQTT Connection AG
+        // MQTT Connection
         mqttService.createMQTTclient();
-        mqttService.connectToBroker().thenAccept(isConnected -> {
+        mqttService.connectToBroker("Publishing UFO").thenAccept(isConnected -> {
             if (isConnected) {
                 Log.d(TAG, "Successfully connected to the broker.");
-                bBrokerConnected=true;
+                bBrokerConnected = true;
             } else {
                 Log.d(TAG, "Failed to connect to the broker.");
-                bBrokerConnected=false;
+                bBrokerConnected = false;
             }
         });
+
         //
     }
 

@@ -11,18 +11,48 @@
     android:background="@drawable/background_gradient"
     tools:context=".activities.MapsActivity" >
 
-    <Button
-    android:id="@+id/setUFOLocation"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Set UFO Location"
-    android:onClick="settingUFOLocation"
-    tools:layout_editor_absoluteX="120dp" />
-
-    <fragment
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:id="@+id/map"/>
-
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="35dp"
+        android:padding="10dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/setUFOLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A97C33"
+            android:fontFamily="sans-serif"
+            android:onClick="settingUFOLocation"
+            android:layout_margin="1dp"
+            android:text=" Set UFO Location "
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:lineSpacingExtra="4dp"
+            android:textAllCaps="false"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/listUFOLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A97C33"
+            android:fontFamily="sans-serif"
+            android:onClick="listingUFOLocation"
+            android:layout_margin="1dp"
+            android:text=" List UFO Location "
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:lineSpacingExtra="4dp"
+            android:textAllCaps="false"
+            android:layout_weight="1" />
+    </LinearLayout>
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="591dp" />
     </LinearLayout>
