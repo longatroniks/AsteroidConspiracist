@@ -1,13 +1,8 @@
 package dte.masteriot.mdp.asteroidconspiracist.services;
 
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
@@ -29,8 +24,6 @@ public class MqttService
 
     private String publishingTopic="asteroid"; //Default topic for publishing
     private String subscriptionTopic="UFO/#"; //Default topic for subscription
-    private String publishingTopic;
-    private String subscriptionTopic;
 
     private Mqtt3AsyncClient client;
 
@@ -62,7 +55,7 @@ public class MqttService
     }
 
     //CompletableFuture to manage the asynchronous connection
-    CompletableFuture<Boolean> connectToBroker(String messageTopicNewConnection)
+    public CompletableFuture<Boolean> connectToBroker(String messageTopicNewConnection)
     {
         Log.d(TAG, "connectToBroker()");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -128,8 +121,6 @@ public class MqttService
 
     }
 
-
-    void publishMessage(String publishingTopic, String Message) {
     public void publishMessage(String publishingTopic, String Message) {
         Log.d(TAG, "publishMessage()");
         client.publishWith()

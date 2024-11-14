@@ -9,6 +9,8 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,4 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public static interface LocationCallback
+    {
+        void onLocationRetrieved(LatLng latLng);
+    }
 }
