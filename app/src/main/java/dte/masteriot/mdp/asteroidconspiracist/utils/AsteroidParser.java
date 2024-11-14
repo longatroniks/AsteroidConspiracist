@@ -32,45 +32,91 @@ public class AsteroidParser {
 
     private static Asteroid parseAsteroid(JSONObject asteroidJson) {
         try {
-            Long id = Long.parseLong(asteroidJson.getString("id"));
+            Long id = asteroidJson.getLong("id");
             String name = asteroidJson.getString("name");
+            String nameLimited = asteroidJson.optString("name_limited", "");
+            String designation = asteroidJson.optString("designation", "");
+            String nasaJplUrl = asteroidJson.optString("nasa_jpl_url", "");
+            boolean isPotentiallyHazardous = asteroidJson.optBoolean("is_potentially_hazardous_asteroid", false);
 
-            // Get the estimated diameter
-            double maxDiameter = getMaxDiameter(asteroidJson);
+            double maxDiameter = getDiameter(asteroidJson, "kilometers", "estimated_diameter_max");
+            double minDiameter = getDiameter(asteroidJson, "kilometers", "estimated_diameter_min");
+            double maxDiameterMeters = getDiameter(asteroidJson, "meters", "estimated_diameter_max");
+            double minDiameterMeters = getDiameter(asteroidJson, "meters", "estimated_diameter_min");
+            double maxDiameterMiles = getDiameter(asteroidJson, "miles", "estimated_diameter_max");
+            double minDiameterMiles = getDiameter(asteroidJson, "miles", "estimated_diameter_min");
+            double maxDiameterFeet = getDiameter(asteroidJson, "feet", "estimated_diameter_max");
+            double minDiameterFeet = getDiameter(asteroidJson, "feet", "estimated_diameter_min");
 
-            // Get the closest approach distance
-            double distance = getClosestApproachDistance(asteroidJson);
+            double absoluteMagnitude = asteroidJson.optDouble("absolute_magnitude_h", 0.0);
 
-            return new Asteroid(id, name, distance, maxDiameter);
+            JSONObject orbitalData = asteroidJson.optJSONObject("orbital_data");
+            String orbitId = orbitalData != null ? orbitalData.optString("orbit_id") : null;
+            double semiMajorAxis = orbitalData != null ? orbitalData.optDouble("semi_major_axis", 0.0) : 0.0;
+
+            double velocity = getVelocity(asteroidJson);
+            List<Asteroid.CloseApproachData> closeApproachDataList = getCloseApproachData(asteroidJson);
+
+            return new Asteroid(id, name, nameLimited, designation, nasaJplUrl, isPotentiallyHazardous,
+                    closeApproachDataList.get(0).getMissDistanceKilometers(), maxDiameter, minDiameter,
+                    maxDiameterMeters, minDiameterMeters, maxDiameterMiles, minDiameterMiles,
+                    maxDiameterFeet, minDiameterFeet, absoluteMagnitude, orbitId, semiMajorAxis,
+                    velocity, closeApproachDataList);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private static double getMaxDiameter(JSONObject asteroidJson) {
+    private static double getDiameter(JSONObject asteroidJson, String unit, String type) {
         try {
-            JSONObject diameter = asteroidJson.getJSONObject("estimated_diameter")
-                    .getJSONObject("kilometers");
-            return diameter.getDouble("estimated_diameter_max");
+            return asteroidJson.getJSONObject("estimated_diameter").getJSONObject(unit).getDouble(type);
         } catch (Exception e) {
             e.printStackTrace();
             return 0.0;
         }
     }
 
-    private static double getClosestApproachDistance(JSONObject asteroidJson) {
+    private static double getVelocity(JSONObject asteroidJson) {
         try {
             JSONArray approachData = asteroidJson.getJSONArray("close_approach_data");
             if (approachData.length() > 0) {
-                return approachData.getJSONObject(0)
-                        .getJSONObject("miss_distance")
-                        .getDouble("kilometers");
+                JSONObject relativeVelocity = approachData.getJSONObject(0).getJSONObject("relative_velocity");
+                return relativeVelocity.getDouble("kilometers_per_hour");
             }
             return 0.0;
         } catch (Exception e) {
             e.printStackTrace();
             return 0.0;
         }
+    }
+
+    private static List<Asteroid.CloseApproachData> getCloseApproachData(JSONObject asteroidJson) {
+        List<Asteroid.CloseApproachData> closeApproachDataList = new ArrayList<>();
+        try {
+            JSONArray approachDataArray = asteroidJson.getJSONArray("close_approach_data");
+            for (int i = 0; i < approachDataArray.length(); i++) {
+                JSONObject approachData = approachDataArray.getJSONObject(i);
+                String date = approachData.optString("close_approach_date", "");
+                String dateFull = approachData.optString("close_approach_date_full", "");
+                long epochDateCloseApproach = approachData.optLong("epoch_date_close_approach", 0);
+
+                double missDistanceKilometers = approachData.getJSONObject("miss_distance").optDouble("kilometers", 0.0);
+                double missDistanceAstronomical = approachData.getJSONObject("miss_distance").optDouble("astronomical", 0.0);
+                double missDistanceLunar = approachData.getJSONObject("miss_distance").optDouble("lunar", 0.0);
+
+                double relativeVelocityKmPerSec = approachData.getJSONObject("relative_velocity").optDouble("kilometers_per_second", 0.0);
+                double relativeVelocityMilesPerHour = approachData.getJSONObject("relative_velocity").optDouble("miles_per_hour", 0.0);
+
+                String orbitingBody = approachData.optString("orbiting_body", "");
+
+                closeApproachDataList.add(new Asteroid.CloseApproachData(date, dateFull, epochDateCloseApproach,
+                        missDistanceKilometers, missDistanceAstronomical, missDistanceLunar,
+                        relativeVelocityKmPerSec, relativeVelocityMilesPerHour, orbitingBody));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return closeApproachDataList;
     }
 }

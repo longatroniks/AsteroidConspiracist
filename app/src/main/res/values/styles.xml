@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Card View Style -->
+    <style name="Widget.App.CardView.Dark" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/card_dark</item>
+        <item name="rippleColor">@color/ripple_dark</item>
+        <item name="cardElevation">4dp</item>
+    </style>
+
+    <!-- Bottom Navigation Style -->
+    <style name="Widget.App.BottomNavigation.Dark" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/surface_dark</item>
+        <item name="itemIconTint">@color/accent_blue</item>
+        <item name="itemTextColor">@color/text_primary_dark</item>
+        <item name="itemRippleColor">@color/ripple_dark</item>
+    </style>
+
+    <!-- Toolbar Style -->
+    <style name="Widget.App.Toolbar.Dark" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/primary_dark</item>
+        <item name="titleTextColor">@color/text_primary_dark</item>
+        <item name="subtitleTextColor">@color/text_secondary_dark</item>
+        <item name="colorControlNormal">@color/text_primary_dark</item>
+    </style>
+
+    <!-- Floating Action Button Style -->
+    <style name="Widget.App.FloatingActionButton.Dark" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">@color/accent_blue</item>
+        <item name="tint">@color/dark_background</item>
+        <item name="rippleColor">@color/ripple_dark</item>
+    </style>
+
+    <!-- Material Alert Dialog Style -->
+    <style name="ThemeOverlay.App.MaterialAlertDialog.Dark" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/accent_blue</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/text_primary_dark</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text.Dark</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.App.Body.Text.Dark</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button.TextButton.Dialog.Dark</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button.TextButton.Dialog.Dark</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Title.Text.Dark" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Body.Text.Dark" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/text_secondary_dark</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Widget.App.Button.TextButton.Dialog.Dark" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/accent_blue</item>
+        <item name="rippleColor">@color/ripple_dark</item>
+    </style>
+</resources>

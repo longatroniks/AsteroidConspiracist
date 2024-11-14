@@ -10,6 +10,8 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -26,7 +28,7 @@ import java.util.List;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
-public class CompassActivity extends AppCompatActivity implements SensorEventListener {
+public class CompassActivity extends BaseActivity implements SensorEventListener {
     private static final String TAG = "CompassActivity";
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -50,7 +52,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_compass);
+
+        View contentView = getLayoutInflater().inflate(R.layout.activity_compass, null);
+        FrameLayout contentFrame = findViewById(R.id.content_frame);
+        contentFrame.addView(contentView);
+
         compassImage = findViewById(R.id.compass_image);
         distanceText = findViewById(R.id.distance_text);
         closestCityText = findViewById(R.id.closest_city_text);
@@ -231,6 +237,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         }
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             geomagnetic = event.values;
+            Log.d(TAG, "onSensorChanged: Magnetic field data - X: " + geomagnetic[0] + " Y: " + geomagnetic[1] + " Z: " + geomagnetic[2]);
         }
         if (gravity != null && geomagnetic != null) {
             float[] R = new float[9];
@@ -242,6 +249,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                 azimuth = (float) Math.toDegrees(orientation[0]);
                 azimuth = (azimuth + 360) % 360;
                 azimuthFix = calculateBearingToTarget();
+
+                Log.d(TAG, "onSensorChanged: Azimuth calculated - " + azimuth);
                 updateCompass();
             }
         }

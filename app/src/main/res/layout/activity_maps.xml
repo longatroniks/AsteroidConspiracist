@@ -1,58 +1,73 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-
-    android:name="com.google.android.gms.maps.SupportMapFragment"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="@drawable/background_gradient"
-    tools:context=".activities.MapsActivity" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true"
+    android:background="?attr/android:windowBackground"
+    android:padding="8dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
-        android:padding="10dp"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/setUFOLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#A97C33"
-            android:fontFamily="sans-serif"
-            android:onClick="settingUFOLocation"
-            android:layout_margin="1dp"
-            android:text=" Set UFO Location "
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:lineSpacingExtra="4dp"
-            android:textAllCaps="false"
-            android:layout_weight="1" />
-        <Button
-            android:id="@+id/listUFOLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#A97C33"
-            android:fontFamily="sans-serif"
-            android:onClick="listingUFOLocation"
-            android:layout_margin="1dp"
-            android:text=" List UFO Location "
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:lineSpacingExtra="4dp"
-            android:textAllCaps="false"
-            android:layout_weight="1" />
-    </LinearLayout>
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Action Buttons Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="591dp" />
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <Button
+                    android:id="@+id/setUFOLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Set UFO Location"
+                    android:textAllCaps="false"
+                    android:textColor="?attr/colorOnPrimary"
+                    android:backgroundTint="?attr/colorPrimary"
+                    app:cornerRadius="8dp"
+                    android:onClick="settingUFOLocation"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/listUFOLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="List UFO Location"
+                    android:textAllCaps="false"
+                    android:textColor="?attr/colorOnPrimary"
+                    android:backgroundTint="?attr/colorSecondary"
+                    app:cornerRadius="8dp"
+                    android:onClick="listingUFOLocation" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Map Fragment -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="500dp" />
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
+</ScrollView>
