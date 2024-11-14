@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,13 +14,13 @@ import java.util.List;
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 
-public class Adapter extends RecyclerView.Adapter<ViewHolder> {
+public class ListAdapter extends RecyclerView.Adapter<ListViewHolder> {
 
     private static final String TAG = "TAGAsteroidConspiracist, MyAdapter";
     private final List<Asteroid> asteroids;
     private SelectionTracker<Long> selectionTracker;
 
-    public Adapter(List<Asteroid> asteroids) {
+    public ListAdapter(List<Asteroid> asteroids) {
         super();
         Log.d(TAG, "AsteroidAdapter() called");
         this.asteroids = asteroids;
@@ -28,13 +28,13 @@ public class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
-        return new ViewHolder(v);
+        return new ListViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ListViewHolder holder, int position) {
         Asteroid asteroid = asteroids.get(position);
         Long itemKey = asteroid.getKey();
         boolean isItemSelected = selectionTracker != null && selectionTracker.isSelected(itemKey);
@@ -72,4 +72,14 @@ public class Adapter extends RecyclerView.Adapter<ViewHolder> {
         this.asteroids.addAll(newAsteroids);
         notifyDataSetChanged();
     }
+
+    public Asteroid getAsteroidByKey(Long key) {
+        for (Asteroid asteroid : asteroids) {
+            if (asteroid.getKey().equals(key)) {
+                return asteroid;
+            }
+        }
+        return null;
+    }
+
 }

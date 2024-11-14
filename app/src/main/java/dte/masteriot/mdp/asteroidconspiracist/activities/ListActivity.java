@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -21,55 +21,54 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.Adapter;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.ItemDetailsLookup;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.ItemKeyProvider;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListItemDetailsLookup;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyProvider;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.OnItemActivatedListener;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
 import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends BaseActivity {
 
-    // App-specific dataset:
     private static final NeoWsAPIService NEO_WS_API_CLIENT = new NeoWsAPIService();
     private RecyclerView recyclerView;
-    private Adapter adapter;
+    private ListAdapter listAdapter;
     private SelectionTracker<Long> tracker;
     private final OnItemActivatedListener onItemActivatedListener =
             new OnItemActivatedListener(this, NEO_WS_API_CLIENT);
     private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
-    String TAG;
+    String TAG ="DENZEL CURRY";
     MqttService mqttService =new MqttService();
     boolean bBrokerConnected=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
 
-        // Prepare the RecyclerView:
+        View contentView = getLayoutInflater().inflate(R.layout.activity_list, null);
+        FrameLayout contentFrame = findViewById(R.id.content_frame);
+        contentFrame.addView(contentView);
+
         recyclerView = findViewById(R.id.recyclerView);
-        adapter = new Adapter(new ArrayList<>()); // Initialize with an empty list
-        recyclerView.setAdapter(adapter);
+        listAdapter = new ListAdapter(new ArrayList<>()); // Initialize with an empty list
+        recyclerView.setAdapter(listAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        // Choose the layout manager
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Selection tracker setup
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
                 new ItemKeyProvider(androidx.recyclerview.selection.ItemKeyProvider.SCOPE_MAPPED, recyclerView),
-                new ItemDetailsLookup(recyclerView),
+                new ListItemDetailsLookup(recyclerView),
                 StorageStrategy.createLongStorage())
                 .withOnItemActivatedListener(onItemActivatedListener)
                 .build();
-        adapter.setSelectionTracker(tracker);
+        listAdapter.setSelectionTracker(tracker);
 
         if (savedInstanceState != null) {
             tracker.onRestoreInstanceState(savedInstanceState);
@@ -106,20 +105,24 @@ public class ListActivity extends AppCompatActivity {
 
     // Fetch asteroids from the API
     private void fetchAsteroids() {
-        executorService.execute(() -> {
-            try {
-                String jsonResponse = NEO_WS_API_CLIENT.getAsteroids();
-                Log.d(TAG,"JSONResponse right hya: " + jsonResponse);
+        NEO_WS_API_CLIENT.getAsteroids(new NeoWsAPIService.NeoWsAPIResponse() {
+            @Override
+            public void onResponse(String jsonResponse) {
                 List<Asteroid> asteroids = AsteroidParser.parseAsteroids(jsonResponse);
 
+                // Update RecyclerView on the main thread
                 runOnUiThread(() -> {
-                    adapter.updateData(asteroids);
-                    if (bBrokerConnected)
+                    listAdapter.updateData(asteroids);
+                    if (bBrokerConnected) {
                         mqttService.PublishAsteroidInfo(asteroids);
+                    }
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+
+            @Override
+            public void onError(String error) {
                 runOnUiThread(() -> Toast.makeText(ListActivity.this, "Failed to fetch asteroids", Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "Error fetching asteroids: " + error);
             }
         });
     }
@@ -134,18 +137,24 @@ public class ListActivity extends AppCompatActivity {
 
     public void seeCurrentSelection(View view) {
         Iterator<Long> iteratorSelectedItemsKeys = tracker.getSelection().iterator();
-        StringBuilder text = new StringBuilder();
+
         while (iteratorSelectedItemsKeys.hasNext()) {
-            text.append(iteratorSelectedItemsKeys.next().toString());
-            if (iteratorSelectedItemsKeys.hasNext()) {
-                text.append(", ");
+            Long selectedKey = iteratorSelectedItemsKeys.next();
+            Asteroid selectedAsteroid = listAdapter.getAsteroidByKey(selectedKey);
+            if (selectedAsteroid != null) {
+                Intent i = new Intent(this, ItemDetailsActivity.class);
+                i.putExtra("asteroid_name", selectedAsteroid.getName());
+                i.putExtra("asteroid_distance", selectedAsteroid.getDistance());
+                i.putExtra("asteroid_max_diameter", selectedAsteroid.getMaxDiameter());
+                i.putExtra("asteroid_min_diameter", selectedAsteroid.getMinDiameter());
+                i.putExtra("asteroid_absolute_magnitude", selectedAsteroid.getAbsoluteMagnitude());
+                i.putExtra("asteroid_orbit_id", selectedAsteroid.getOrbitId());
+                i.putExtra("asteroid_semi_major_axis", selectedAsteroid.getSemiMajorAxis());
+                startActivity(i);
             }
         }
-        text = new StringBuilder("Keys of currently selected items = \n" + text);
-        Intent i = new Intent(this, SecondActivity.class);
-        i.putExtra("text", text.toString());
-        startActivity(i);
     }
+
 
     public void UFOmap (View view)
     {

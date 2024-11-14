@@ -13,7 +13,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AsteroidConspiracist"
+        android:theme="@style/Base.Theme.AsteroidConspiracist.Light"
         android:usesCleartextTraffic="false"
         tools:targetApi="31">
 
@@ -37,7 +37,7 @@
             android:exported="true"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".activities.MenuActivity"
+            android:name=".activities.HomeActivity"
             android:exported="false" />
         <activity
             android:name=".activities.CompassActivity"
@@ -46,7 +46,7 @@
             android:name=".activities.ListActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.SecondActivity"
+            android:name=".activities.ItemDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.IntroActivity"

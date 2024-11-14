@@ -6,12 +6,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
-public class CompassActivity extends AppCompatActivity implements SensorEventListener {
+public class CompassActivity extends BaseActivity implements SensorEventListener {
     private static final String TAG = "CompassActivity";
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -27,16 +29,19 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_compass);
+
+        View contentView = getLayoutInflater().inflate(R.layout.activity_compass, null);
+        FrameLayout contentFrame = findViewById(R.id.content_frame);
+        contentFrame.addView(contentView);
+
         compassImage = findViewById(R.id.compass_image);
 
-        // Configuración del sensor
+        // Set up sensors
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-        Log.d(TAG, "onCreate: Sensors initialized");
     }
+
 
     @Override
     protected void onResume() {

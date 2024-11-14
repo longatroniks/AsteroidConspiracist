@@ -180,7 +180,7 @@ public class MqttService
 
             publishingTopicAsteroid="asteroid/"+asteroidName+"/Diameter";
             Log.d(TAG,  "Topic:"+publishingTopicAsteroid);
-            messageTopic=String.valueOf(asteroids.get(i).getDiameter());
+            messageTopic=String.valueOf(asteroids.get(i).getMinDiameter());
             publishMessage(publishingTopicAsteroid,messageTopic);
             Log.d(TAG, "messageTopic:"+messageTopic);
         }

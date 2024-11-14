@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -9,13 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-public final class ItemDetailsLookup extends androidx.recyclerview.selection.ItemDetailsLookup<Long> {
+public final class ListItemDetailsLookup extends androidx.recyclerview.selection.ItemDetailsLookup<Long> {
 
     private static final String TAG = "TAGListOfItems, MyItemDetailsLookup";
     private final RecyclerView mRecyclerView;
 
     @SuppressLint("LongLogTag")
-    public ItemDetailsLookup(RecyclerView recyclerView) {
+    public ListItemDetailsLookup(RecyclerView recyclerView) {
         Log.d(TAG, "MyItemDetailsLookup() called");
         mRecyclerView = recyclerView;
     }
@@ -28,9 +28,9 @@ public final class ItemDetailsLookup extends androidx.recyclerview.selection.Ite
         View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
         if (view != null) {
             RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(view);
-            if (holder instanceof ViewHolder) {
+            if (holder instanceof ListViewHolder) {
                 int positionOfTheHolder = holder.getAbsoluteAdapterPosition();
-                Long keyOfTheHolder = ((Adapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
+                Long keyOfTheHolder = ((ListAdapter) holder.getBindingAdapter()).getKeyAtPosition(positionOfTheHolder);
 
                 ItemDetails<Long> itemDetails = new ItemDetails<Long>() {
                     @Override

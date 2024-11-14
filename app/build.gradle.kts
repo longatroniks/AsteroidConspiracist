@@ -46,7 +46,6 @@ android {
 }
 
 dependencies {
-
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -56,15 +55,14 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.android.support:support-annotations:28.0.0")
     implementation("androidx.annotation:annotation:1.9.1")
-    implementation ("androidx.versionedparcelable:versionedparcelable:1.1.1")
-    implementation ("androidx.core:core:1.13.0")
+    implementation("androidx.versionedparcelable:versionedparcelable:1.1.1")
+    implementation("androidx.core:core:1.13.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
-
+    implementation("androidx.drawerlayout:drawerlayout:1.1.1")
+    implementation("com.hivemq:hivemq-mqtt-client:1.3.3")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-
-    implementation("com.hivemq:hivemq-mqtt-client:1.3.3")
-
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:title="Home"
+        android:icon="@drawable/ic_distance" />
+    <item
+        android:id="@+id/nav_compass"
+        android:title="Compass"
+        android:icon="@drawable/ic_compass" />
+    <item
+        android:id="@+id/nav_asteroid_list"
+        android:title="Asteroid List"
+        android:icon="@drawable/ic_list" />
+    <item
+        android:id="@+id/nav_mqtt"
+        android:title="Maps"
+        android:icon="@drawable/ic_mqtt" />
+</menu>

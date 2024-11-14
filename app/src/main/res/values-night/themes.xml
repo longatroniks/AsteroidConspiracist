@@ -1,7 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base Dark Theme -->
     <style name="Base.Theme.AsteroidConspiracist" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Color attributes -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="colorSecondaryVariant">@color/accent_blue_dark</item>
+        <item name="colorAccent">@color/accent_blue</item>
+
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/text_primary_dark</item>
+        <item name="colorSurfaceVariant">@color/card_dark</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+        <item name="android:textColorHint">@color/text_disabled_dark</item>
+
+        <!-- Component styles -->
+        <item name="cardBackgroundColor">@color/card_dark</item>
+        <item name="materialCardViewStyle">@style/Widget.App.CardView.Dark</item>
+        <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigation.Dark</item>
+        <item name="toolbarStyle">@style/Widget.App.Toolbar.Dark</item>
+        <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton.Dark</item>
+
+        <!-- System bars -->
+        <item name="android:statusBarColor">@color/status_bar_dark</item>
+        <item name="android:navigationBarColor">@color/dark_background</item>
+
+        <!-- Ripple effect -->
+        <item name="colorControlHighlight">@color/ripple_dark</item>
+
+        <!-- Dialog attributes -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog.Dark</item>
     </style>
+
+    <!-- Main theme that inherits from base -->
+    <style name="Theme.AsteroidConspiracist" parent="Base.Theme.AsteroidConspiracist" />
 </resources>

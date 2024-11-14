@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
-public class IntroActivity extends AppCompatActivity {
+public class IntroActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +18,7 @@ public class IntroActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(IntroActivity.this, MenuActivity.class);
+                Intent intent = new Intent(IntroActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
             }

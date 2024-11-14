@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers;
+package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -9,7 +9,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 
-import dte.masteriot.mdp.asteroidconspiracist.activities.SecondActivity;
+import dte.masteriot.mdp.asteroidconspiracist.activities.ItemDetailsActivity;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
 
 public class OnItemActivatedListener implements androidx.recyclerview.selection.OnItemActivatedListener<Long> {
@@ -32,7 +32,7 @@ public class OnItemActivatedListener implements androidx.recyclerview.selection.
         Log.d(TAG, "Clicked item with position = " + itemdetails.getPosition()
                 + " and key = " + itemdetails.getSelectionKey());
 
-        Intent i = new Intent(context, SecondActivity.class);
+        Intent i = new Intent(context, ItemDetailsActivity.class);
         i.putExtra("text", "Clicked item with position = " + itemdetails.getPosition()
                 + " and key = " + itemdetails.getSelectionKey());
         context.startActivity(i);

@@ -2,4 +2,46 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Base colors -->
+    <color name="dark_background">#1D1C16</color>
+    <color name="light_background">#FFFFFF</color>
+
+    <!-- Primary colors -->
+    <color name="primary_dark">#4D4839</color>
+    <color name="primary_light">#8F6A33</color>
+    <color name="primary_variant">#51390C</color>
+
+    <!-- Accent color -->
+    <color name="accent_blue">#08FBFF</color>
+    <color name="accent_blue_dark">#06C9CC</color>
+    <color name="accent_blue_light">#7CFDFF</color>
+
+    <!-- Text colors -->
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#E0E0E0</color>
+    <color name="text_disabled_dark">#9E9E9E</color>
+
+    <color name="text_primary_light">#1D1C16</color>
+    <color name="text_secondary_light">#4D4839</color>
+    <color name="text_disabled_light">#8F6A33</color>
+
+    <!-- Surface colors -->
+    <color name="surface_dark">#2D2C26</color>
+    <color name="surface_light">#F5F5F5</color>
+
+    <!-- Card colors -->
+    <color name="card_dark">#3D3C36</color>
+    <color name="card_light">#FFFFFF</color>
+
+    <!-- Ripple colors -->
+    <color name="ripple_dark">#4008FBFF</color>
+    <color name="ripple_light">#408F6A33</color>
+
+    <!-- Status bar colors -->
+    <color name="status_bar_dark">#121210</color>
+    <color name="status_bar_light">#4D4839</color>
+
+    <!-- Overlay colors -->
+    <color name="scrim_dark">#52000000</color>
+    <color name="scrim_light">#26000000</color>
 </resources>
