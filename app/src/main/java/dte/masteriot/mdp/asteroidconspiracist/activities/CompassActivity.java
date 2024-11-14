@@ -263,8 +263,11 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
 
     private void updateCompass() {
         float rotation = azimuthFix - azimuth;
-        compassImage.setRotation(rotation);
-        Log.d(TAG, "updateCompass: Compass rotated to - " + rotation + " degrees");
+        // Interpolación para suavizar el movimiento, ajusta el factor entre 0.1f y 1f para mayor o menor suavidad.
+        float smoothFactor = 0.1f; // Un valor menor hace la transición más suave
+        float smoothedRotation = compassImage.getRotation() + smoothFactor * (rotation - compassImage.getRotation());
+
+        compassImage.setRotation(smoothedRotation);
     }
 
     @Override
