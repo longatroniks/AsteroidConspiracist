@@ -1,9 +1,6 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
@@ -46,13 +43,13 @@ import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendAdapter;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendItem;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class HomeActivity extends BaseActivity {
 
     private PieChart pieChart;
     private BarChart barChart;
     private TextView closeApproachDetails;
+    private TextView barChartHeading;
     private List<Asteroid> asteroids = new ArrayList<>();
     private RecyclerView legendRecyclerView;
     private LegendAdapter legendAdapter;
@@ -70,9 +67,11 @@ public class HomeActivity extends BaseActivity {
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);
         closeApproachDetails = findViewById(R.id.closeApproachDetails);
+        barChartHeading = findViewById(R.id.barChartHeading);
 
         fetchAsteroidData();
     }
+
 
     private void fetchAsteroidData() {
         List<Asteroid> asteroidList = AsteroidRepository.getInstance().getAsteroidList();
@@ -248,6 +247,9 @@ public class HomeActivity extends BaseActivity {
         List<String> closeApproachDates = new ArrayList<>();
         int[] colors = getResources().getIntArray(R.array.earth_tones);
         int colorOnSurfaceVariant = ResourcesCompat.getColor(getResources(), R.color.colorOnSurfaceVariant, null);
+
+        String simplifiedName = asteroid.getName().split(" ")[1];
+        barChartHeading.setText(String.format("Upcoming for %s", simplifiedName));
 
         Date today = new Date();
         List<Asteroid.CloseApproachData> upcomingApproaches = asteroid.getCloseApproachData().stream()

@@ -1,12 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <View
-        android:id="@+id/compass_background"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/title_text"
@@ -14,9 +9,7 @@
         android:layout_height="wrap_content"
         android:text="Digital Compass"
         android:textSize="28sp"
-        android:textColor="?attr/colorOnPrimary"
-        />
-
+        android:textColor="?attr/colorOnSurface" />
 
     <ImageView
         android:id="@+id/compass_image"
@@ -24,7 +17,8 @@
         android:layout_height="350dp"
         android:layout_centerInParent="true"
         android:src="@drawable/compass"
-        android:rotation="0" />
+        android:rotation="0"
+        app:tint="?attr/colorOnSurface" />
 
     <TextView
         android:id="@+id/info_text"
@@ -35,5 +29,5 @@
         android:layout_marginTop="16dp"
         android:text="Point towards your destination"
         android:textSize="25sp"
-        android:textColor="#B0B0B0"/>
+        android:textColor="?attr/colorOnSurface"/>
 </RelativeLayout>

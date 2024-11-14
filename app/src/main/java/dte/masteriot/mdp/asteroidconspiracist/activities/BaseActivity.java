@@ -39,10 +39,35 @@ public class BaseActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        toolbar.setBackgroundColor(getResources().getColor(R.color.text_secondary_light));
-
         setupNavigationMenu();
         setupHighContrastSwitch();
+        setActivityTitle();
+    }
+
+    private void setActivityTitle() {
+        String className = this.getClass().getSimpleName();
+        String title;
+
+        switch (className) {
+            case "HomeActivity":
+                title = "Home";
+                break;
+            case "CompassActivity":
+                title = "Compass";
+                break;
+            case "ListActivity":
+                title = "Asteroid List";
+                break;
+            case "MapsActivity":
+                title = "Maps";
+                break;
+            default:
+                title = className.replace("Activity", ""); // Fallback for unexpected class names
+        }
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
     }
 
     private void setupNavigationMenu() {

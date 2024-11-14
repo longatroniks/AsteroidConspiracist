@@ -1,7 +1,9 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,9 +17,11 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private TextView nameView, distanceView, maxDiameterView, minDiameterView,
             velocityView, magnitudeView, hazardousView, orbitIdView,
             semiMajorAxisView, nasaJplUrlView;
+    private static final String PREF_HIGH_CONTRAST_MODE = "high_contrast_mode";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        applyHighContrastTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_detail);
 
@@ -50,6 +54,26 @@ public class ItemDetailsActivity extends AppCompatActivity {
             orbitIdView.setText("Orbit ID: " + intent.getStringExtra("asteroid_orbit_id"));
             semiMajorAxisView.setText(String.format("Semi-Major Axis: %.3f", intent.getDoubleExtra("asteroid_semi_major_axis", 0)));
             nasaJplUrlView.setText("NASA JPL URL: " + intent.getStringExtra("asteroid_nasa_jpl_url"));
+        }
+    }
+
+    private void applyHighContrastTheme() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean highContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+
+        if (highContrastEnabled) {
+            if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                setTheme(R.style.Theme_AsteroidConspiracist_HighContrast_Dark);
+            } else {
+                setTheme(R.style.Theme_AsteroidConspiracist_HighContrast_Light);
+            }
+        } else {
+            if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+                setTheme(R.style.Theme_AsteroidConspiracist_Dark);
+            } else {
+                setTheme(R.style.Theme_AsteroidConspiracist_Light);
+            }
         }
     }
 }
