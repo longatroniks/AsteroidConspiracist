@@ -1,42 +1,41 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import android.content.SharedPreferences;
-
-import dte.masteriot.mdp.asteroidconspiracist.R;
-
-import android.content.SharedPreferences;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddShelterActivity extends AppCompatActivity {
+import dte.masteriot.mdp.asteroidconspiracist.R;
+
+public class AddShelterActivity extends BaseActivity {
 
     private static final String TAG = "AddShelterActivity";
     private EditText shelterNameEditText;
     private EditText cityNameEditText;
     private Button publishButton;
     private Button showListButton;
-    private TextView locationTextView;
     private ListView sheltersListView;
     private FusedLocationProviderClient fusedLocationClient;
     private Location currentLocation;
@@ -46,8 +45,17 @@ public class AddShelterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_shelter);
 
+        // Inflate activity_add_shelter.xml within the content_frame of BaseActivity
+        View contentView = getLayoutInflater().inflate(R.layout.activity_add_shelter, null);
+        FrameLayout contentFrame = findViewById(R.id.content_frame);
+        contentFrame.addView(contentView);
+
+        // Set up the toolbar and drawer toggle as provided by BaseActivity
+        setSupportActionBar(toolbar);
+        enableBackButton(false);
+
+        // Initialize the UI elements
         shelterNameEditText = findViewById(R.id.shelter_name_edit_text);
         cityNameEditText = findViewById(R.id.city_name_edit_text);
         publishButton = findViewById(R.id.publish_button);
@@ -56,52 +64,44 @@ public class AddShelterActivity extends AppCompatActivity {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         } else {
             startLocationUpdates();
         }
 
-        publishButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String shelterName = shelterNameEditText.getText().toString();
-                String cityName = cityNameEditText.getText().toString();
+        publishButton.setOnClickListener(v -> publishShelter());
+        showListButton.setOnClickListener(v -> showShelterList());
+    }
 
-                if (shelterName.isEmpty() || cityName.isEmpty() || currentLocation == null) {
-                    Toast.makeText(AddShelterActivity.this, "Complete todos los campos y asegúrese de que la ubicación esté disponible", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+    private void publishShelter() {
+        String shelterName = shelterNameEditText.getText().toString();
+        String cityName = cityNameEditText.getText().toString();
 
-                double latitude = currentLocation.getLatitude();
-                double longitude = currentLocation.getLongitude();
-                //SharedPreferences sharedPreferences = getSharedPreferences("ShelterData", MODE_PRIVATE);
-                //sharedPreferences.edit().clear().apply(); // Borra todos los datos guardados
+        if (shelterName.isEmpty() || cityName.isEmpty() || currentLocation == null) {
+            Toast.makeText(this, "Please fill all fields and ensure location is available", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                SharedPreferences sharedPreferences = getSharedPreferences("ShelterData", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                // Guarda solo los valores: "shelterName, cityName, latitude, longitude"
-                String shelterEntry = shelterName + ", " + cityName + ", " + latitude + ", " + longitude;
-                sheltersList.add(shelterEntry);
-                editor.putString("shelter_" + sheltersList.size(), shelterEntry);
-                editor.putInt("shelter_count", sheltersList.size());
-                editor.apply();
+        double latitude = currentLocation.getLatitude();
+        double longitude = currentLocation.getLongitude();
+        String shelterEntry = shelterName + ", " + cityName + ", " + latitude + ", " + longitude;
 
+        SharedPreferences sharedPreferences = getSharedPreferences("ShelterData", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        sheltersList.add(shelterEntry);
+        editor.putString("shelter_" + sheltersList.size(), shelterEntry);
+        editor.putInt("shelter_count", sheltersList.size());
+        editor.apply();
 
+        Log.d(TAG, "Shelter saved: " + shelterEntry);
+        Toast.makeText(this, "Shelter saved successfully", Toast.LENGTH_SHORT).show();
+    }
 
-                Log.d(TAG, "Shelter publicado y guardado: " + shelterEntry);
-                Toast.makeText(AddShelterActivity.this, "Shelter guardado correctamente", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        showListButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadSheltersFromPreferences();
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(AddShelterActivity.this, android.R.layout.simple_list_item_1, sheltersList);
-                sheltersListView.setAdapter(adapter);
-            }
-        });
+    private void showShelterList() {
+        loadSheltersFromPreferences();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sheltersList);
+        sheltersListView.setAdapter(adapter);
     }
 
     private void loadSheltersFromPreferences() {
@@ -116,20 +116,18 @@ public class AddShelterActivity extends AppCompatActivity {
 
     private void startLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(5000); // Actualiza cada 5 segundos
-        locationRequest.setFastestInterval(2000); // Intervalo más rápido de 2 segundos
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(2000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    if (locationResult == null) {
-                        return;
-                    }
+                    if (locationResult == null) return;
                     for (Location location : locationResult.getLocations()) {
                         currentLocation = location;
-                        Log.d(TAG, "Ubicación actualizada: Latitud = " + currentLocation.getLatitude() + ", Longitud = " + currentLocation.getLongitude());
+                        Log.d(TAG, "Updated location: Lat = " + currentLocation.getLatitude() + ", Lng = " + currentLocation.getLongitude());
                     }
                 }
             }, getMainLooper());
@@ -143,7 +141,7 @@ public class AddShelterActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
             } else {
-                Toast.makeText(this, "Permiso de ubicación denegado.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Location permission denied.", Toast.LENGTH_SHORT).show();
             }
         }
     }

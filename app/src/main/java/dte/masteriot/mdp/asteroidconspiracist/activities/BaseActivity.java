@@ -61,6 +61,9 @@ public class BaseActivity extends AppCompatActivity {
             case "MapsActivity":
                 title = "Maps";
                 break;
+            case "AddShelterActivity":
+                title = "Add Shelter";
+                break;
             default:
                 title = className.replace("Activity", ""); // Fallback for unexpected class names
         }
@@ -81,6 +84,8 @@ public class BaseActivity extends AppCompatActivity {
                 intent = new Intent(this, ListActivity.class);
             } else if (item.getItemId() == R.id.nav_mqtt) {
                 intent = new Intent(this, MapsActivity.class);
+            } else if (item.getItemId() == R.id.nav_add_shelter) {
+                intent = new Intent(this, AddShelterActivity.class);
             }
 
             if (intent != null) {

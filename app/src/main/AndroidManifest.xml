@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!-- This is here so we can access the API -->
-    <uses-permission android:name="android.permission.INTERNET" /> <!-- Add permission to Location services  AG -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -34,7 +34,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBQF4qb-ARktk5ly9wn9QATJfutlCI2VXA" />
+            android:value="${MAPS_API_KEY}" />
 
         <activity
             android:name=".activities.MapsActivity"

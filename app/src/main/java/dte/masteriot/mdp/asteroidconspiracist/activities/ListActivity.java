@@ -28,7 +28,7 @@ import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyP
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.OnItemActivatedListener;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
@@ -42,7 +42,7 @@ public class ListActivity extends BaseActivity {
     private ListAdapter listAdapter;
     private SelectionTracker<Long> tracker;
     private final OnItemActivatedListener onItemActivatedListener =
-            new OnItemActivatedListener(this, NEO_WS_API_CLIENT);
+            new OnItemActivatedListener(this, listAdapter);
     private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
     String TAG;

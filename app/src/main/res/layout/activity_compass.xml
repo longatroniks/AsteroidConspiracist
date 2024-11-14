@@ -44,7 +44,7 @@
         android:layout_marginTop="16dp"
         android:text="Point towards your destination"
         android:textSize="25sp"
-        android:textColor="#B0B0B0"
+        android:textColor="?attr/colorOnSurface"
         android:fontFamily="sans-serif" />
 
     <!-- Texto para mostrar la distancia -->
@@ -57,7 +57,7 @@
         android:layout_marginTop="8dp"
         android:text="Distance: Calculating..."
         android:textSize="18sp"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         android:fontFamily="sans-serif" />
 
     <!-- Texto para mostrar la ciudad más cercana -->
@@ -70,7 +70,7 @@
         android:layout_marginTop="8dp"
         android:text="City: N/A"
         android:textSize="18sp"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         android:fontFamily="sans-serif" />
 
     <!-- Texto para mostrar el shelter más cercano -->
@@ -83,8 +83,7 @@
         android:layout_marginTop="8dp"
         android:text="Shelter name: N/A"
         android:textSize="18sp"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         android:fontFamily="sans-serif" />
 
-        android:textColor="?attr/colorOnSurface"/>
 </RelativeLayout>
