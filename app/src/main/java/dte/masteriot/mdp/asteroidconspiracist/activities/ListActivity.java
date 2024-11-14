@@ -8,9 +8,11 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,20 +28,26 @@ import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyP
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
+import dte.masteriot.mdp.asteroidconspiracist.recyclerview.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
+import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class ListActivity extends BaseActivity {
 
+    // App-specific dataset:
     private static final NeoWsAPIService NEO_WS_API_CLIENT = new NeoWsAPIService();
     private RecyclerView recyclerView;
     private ListAdapter listAdapter;
     private SelectionTracker<Long> tracker;
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private MqttService mqttService = new MqttService();
-    private boolean bBrokerConnected = false;
-    private static final String TAG = "AsteroidConspiracist";
+    private final OnItemActivatedListener onItemActivatedListener =
+            new OnItemActivatedListener(this, NEO_WS_API_CLIENT);
+    private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
+
+    String TAG;
+    MqttService mqttService =new MqttService();
+    boolean bBrokerConnected=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +63,7 @@ public class ListActivity extends BaseActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Selection tracker setup
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
@@ -71,11 +80,20 @@ public class ListActivity extends BaseActivity {
         }
 
         fetchAsteroids();
+
+        // MQTT Connection
         mqttService.createMQTTclient();
-        mqttService.connectToBroker().thenAccept(isConnected -> {
-            bBrokerConnected = isConnected;
-            Log.d(TAG, isConnected ? "Connected to the broker." : "Failed to connect to the broker.");
+        mqttService.connectToBroker("Publishing UFO").thenAccept(isConnected -> {
+            if (isConnected) {
+                Log.d(TAG, "Successfully connected to the broker.");
+                bBrokerConnected = true;
+            } else {
+                Log.d(TAG, "Failed to connect to the broker.");
+                bBrokerConnected = false;
+            }
         });
+
+        //
     }
 
     @Override

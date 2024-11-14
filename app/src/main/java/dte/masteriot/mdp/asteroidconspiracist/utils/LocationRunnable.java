@@ -3,7 +3,6 @@ package dte.masteriot.mdp.asteroidconspiracist.utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;

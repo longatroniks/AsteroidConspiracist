@@ -15,9 +15,15 @@ public class MqttService
     String TAG;
     private String serverHost;
     private int serverPort;
+    //Topics for Asteroid:
+        //topic=asteroidName/Id
+        //topic=asteroidName/Distance
+        //topic=asteroidName/Diameter
+    //Topics for UFO:
+        //topic=UFO/Id/Location
 
-    private String publishingTopic;
-    private String subscriptionTopic;
+    private String publishingTopic="asteroid"; //Default topic for publishing
+    private String subscriptionTopic="UFO/#"; //Default topic for subscription
 
     private Mqtt3AsyncClient client;
 
@@ -49,7 +55,7 @@ public class MqttService
     }
 
     //CompletableFuture to manage the asynchronous connection
-    public CompletableFuture<Boolean> connectToBroker()
+    public CompletableFuture<Boolean> connectToBroker(String messageTopicNewConnection)
     {
         Log.d(TAG, "connectToBroker()");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -86,6 +92,7 @@ public class MqttService
     void subscribeToTopic()
     {
         Log.d(TAG, "subscribeToTopic()");
+
         client.subscribeWith()
                 .topicFilter(subscriptionTopic)
                 .callback(publish -> {
@@ -94,6 +101,7 @@ public class MqttService
                     // "publish" is an object of class Mqtt3Publish, which can be used to
                     // obtain the information of the received message
                     String payloadString = new String(publish.getPayloadAsBytes());
+
                     //TextViewSubscribed.setText("(topic:"+subscriptionTopic+"):"+payloadString);
 
                 })
@@ -110,7 +118,9 @@ public class MqttService
 
                     }
                 });
+
     }
+
     public void publishMessage(String publishingTopic, String Message) {
         Log.d(TAG, "publishMessage()");
         client.publishWith()
