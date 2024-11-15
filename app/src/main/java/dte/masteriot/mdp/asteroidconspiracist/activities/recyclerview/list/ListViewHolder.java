@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list;
 
 import android.graphics.Color;
 import android.view.View;

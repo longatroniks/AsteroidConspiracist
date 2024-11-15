@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendAdapter;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendItem;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.LegendAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.LegendItem;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
 

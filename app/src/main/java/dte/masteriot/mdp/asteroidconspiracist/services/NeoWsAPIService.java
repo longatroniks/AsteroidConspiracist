@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.List;
 
 import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
+import dte.masteriot.mdp.asteroidconspiracist.utils.json.AsteroidParser;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 
 public class NeoWsAPIService {

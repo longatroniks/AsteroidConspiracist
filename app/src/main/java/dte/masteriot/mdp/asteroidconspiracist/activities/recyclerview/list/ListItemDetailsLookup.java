@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list;
 
 import android.annotation.SuppressLint;
 import android.util.Log;

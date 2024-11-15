@@ -1,7 +1,5 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend;
 
-import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

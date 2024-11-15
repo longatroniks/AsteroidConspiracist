@@ -1,13 +1,12 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.observation;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.observation;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.gms.maps.model.LatLng;
+
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.entities.Observation;
 

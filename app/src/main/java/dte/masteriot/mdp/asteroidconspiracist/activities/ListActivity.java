@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListItemDetailsLookup;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyProvider;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.ListAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.ListItemDetailsLookup;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.helpers.ItemKeyProvider;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
 import dte.masteriot.mdp.asteroidconspiracist.R;

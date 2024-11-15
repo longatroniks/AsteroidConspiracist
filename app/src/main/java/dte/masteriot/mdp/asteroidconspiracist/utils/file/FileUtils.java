@@ -1,12 +1,11 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.utils.file;
 
 import android.content.Context;
 import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;

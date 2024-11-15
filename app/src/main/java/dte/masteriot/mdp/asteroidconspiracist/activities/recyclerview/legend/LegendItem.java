@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend;
 
 public class LegendItem {
     private final int color;

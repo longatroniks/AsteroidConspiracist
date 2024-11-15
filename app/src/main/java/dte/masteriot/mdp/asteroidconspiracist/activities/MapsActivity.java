@@ -12,7 +12,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
@@ -26,14 +25,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.card.MaterialCardView;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.activities.modals.ObservationModal;
 import dte.masteriot.mdp.asteroidconspiracist.entities.Observation;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.observation.ObservationPagerAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.observation.ObservationPagerAdapter;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.FileUtils;
+import dte.masteriot.mdp.asteroidconspiracist.utils.file.FileUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

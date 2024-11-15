@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.utils.json;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

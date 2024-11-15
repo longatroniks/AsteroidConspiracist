@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.helpers;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.ListAdapter;
 
 public class ItemKeyProvider extends androidx.recyclerview.selection.ItemKeyProvider<Long> {
     private static final String TAG = "TAGAsteroidConspiracist, ItemKeyProvider";
