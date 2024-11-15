@@ -1,12 +1,7 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Typeface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -38,7 +33,6 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,6 +44,9 @@ import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.Leg
 import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.LegendItem;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
+import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidCalculationHelper;
+import dte.masteriot.mdp.asteroidconspiracist.utils.LoadingStateManager;
+import dte.masteriot.mdp.asteroidconspiracist.utils.network.NetworkHelper;
 
 public class HomeActivity extends BaseActivity {
 
@@ -57,13 +54,20 @@ public class HomeActivity extends BaseActivity {
     private BarChart barChart;
     private TextView closeApproachDetails, barChartHeading, loadingMessage;
     private ProgressBar loadingSpinner;
+
     private List<Asteroid> asteroids = new ArrayList<>();
+
     private RecyclerView legendRecyclerView;
     private LegendAdapter legendAdapter;
+
+    private final AsteroidCalculationHelper calculationHelper = new AsteroidCalculationHelper();
+    private NetworkHelper networkHelper;
+    private LoadingStateManager loadingStateManager;
+
     private boolean isHighlighting = false;
     private boolean isDataLoading = true;
+
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-    private BroadcastReceiver networkReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,31 +85,24 @@ public class HomeActivity extends BaseActivity {
         loadingMessage = findViewById(R.id.loadingMessage);
         loadingSpinner = findViewById(R.id.loadingSpinner);
 
-        showLoadingScreen();
+        networkHelper = new NetworkHelper(this);
+        loadingStateManager = new LoadingStateManager(loadingMessage, loadingSpinner, pieChart, barChart);
+
+        loadingStateManager.showLoadingScreen();
         registerNetworkReceiver();
 
         fetchAsteroidData();
     }
 
-    private void showLoadingScreen() {
-        loadingMessage.setVisibility(View.VISIBLE);
-        loadingSpinner.setVisibility(View.VISIBLE);
-        pieChart.setVisibility(View.GONE);
-        barChart.setVisibility(View.GONE);
+    private void registerNetworkReceiver() {
+        networkHelper.registerNetworkReceiver(() -> {
+            if (!isDataLoading) {
+                loadingMessage.setText(R.string.LOADING_MESSAGE);
+                isDataLoading = true;
+                fetchAsteroidData();
+            }
+        });
     }
-
-    private void hideLoadingScreen() {
-        loadingMessage.setVisibility(View.GONE);
-        loadingSpinner.setVisibility(View.GONE);
-
-        // Make sure chart views are visible
-        findViewById(R.id.pieChartCard).setVisibility(View.VISIBLE);
-        findViewById(R.id.barChartCard).setVisibility(View.VISIBLE);
-        findViewById(R.id.detailsCard).setVisibility(View.VISIBLE);
-        pieChart.setVisibility(View.VISIBLE);
-        barChart.setVisibility(View.VISIBLE);
-    }
-
 
     private void fetchAsteroidData() {
         Log.d("HomeActivity", "Fetching asteroid data...");
@@ -115,7 +112,7 @@ public class HomeActivity extends BaseActivity {
             this.asteroids = asteroidList;
             Log.d("HomeActivity", "Data loaded from cache. Loading charts...");
             loadChartData();
-        } else if (isNetworkAvailable()) {
+        } else if (networkHelper.isNetworkAvailable()) {
             NeoWsAPIService apiService = new NeoWsAPIService();
             apiService.fetchAndStoreAsteroids(this, new NeoWsAPIService.NeoWsAPIResponse() {
                 @Override
@@ -125,18 +122,18 @@ public class HomeActivity extends BaseActivity {
                         Log.d("HomeActivity", "Data fetched from API. Loading charts...");
                         loadChartData();
                     } else {
-                        showNetworkError();
+                        loadingStateManager.showNetworkError("No data available.");
                     }
                 }
 
                 @Override
                 public void onError(String error) {
                     Log.e("HomeActivity", "Error fetching data: " + error);
-                    showNetworkError();
+                    loadingStateManager.showNetworkError("Failed to fetch data.");
                 }
             });
         } else {
-            showNetworkError();
+            loadingStateManager.showNetworkError("Waiting for an internet connection...");
         }
     }
 
@@ -144,45 +141,18 @@ public class HomeActivity extends BaseActivity {
         if (!asteroids.isEmpty()) {
             setupPieChart();
             setupBarChart();
-            hideLoadingScreen();
+            loadingStateManager.hideLoadingScreen();
             Log.d("HomeActivity", "Charts loaded and screen displayed.");
         } else {
             Log.w("HomeActivity", "Asteroid data is empty; showing network error.");
-            showNetworkError();
+            loadingStateManager.showNetworkError("Waiting for an internet connection...");
         }
-    }
-
-
-    private void showNetworkError() {
-        loadingMessage.setText("Waiting for an internet connection...");
-        isDataLoading = false;
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
-    }
-
-
-    private void registerNetworkReceiver() {
-        networkReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (!isDataLoading && isNetworkAvailable()) {
-                    loadingMessage.setText("Calculations are being made...");
-                    isDataLoading = true;
-                    fetchAsteroidData();
-                }
-            }
-        };
-        registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private void setupPieChart() {
         Typeface spaceMonoTypeface = ResourcesCompat.getFont(this, R.font.spacemonoregular);
         ArrayList<PieEntry> entries = new ArrayList<>();
-        Map<Asteroid, Float> threatPercentages = calculateThreatPercentages(asteroids);
+        Map<Asteroid, Float> threatPercentages = calculationHelper.calculateThreatPercentages(asteroids);
 
         List<LegendItem> legendItems = new ArrayList<>();
         int[] colors = getResources().getIntArray(R.array.earth_tones);
@@ -387,6 +357,7 @@ public class HomeActivity extends BaseActivity {
             }
         });
     }
+
     private void displayCloseApproachDetails(Asteroid asteroid, Asteroid.CloseApproachData closeApproachData) {
         String details = "Close Approach of " + asteroid.getName() + ":\n\n" +
                 "On " + formatDate(closeApproachData.getDateFull()) + ", this asteroid will approach Earth with a closest miss distance of approximately " +
@@ -418,84 +389,14 @@ public class HomeActivity extends BaseActivity {
         return String.format("%.1f", value);
     }
 
-    // Remaining methods (calculateThreatScore, calculateThreatPercentages, etc.) stay the same.
-    private int calculateThreatScore(Asteroid asteroid) {
-        double distanceWeight = 0.3;
-        double velocityWeight = 0.2;
-        double diameterWeight = 0.2;
-        double magnitudeWeight = 0.1;
-        double hazardWeight = 0.1;
-        double closeApproachWeight = 0.1;
-
-        double distanceScore = 1 - normalize(asteroid.getDistance(), 0, 10000000);
-        double velocityScore = normalize(asteroid.getVelocity(), 0, 50000);
-        double diameterScore = normalize(asteroid.getMaxDiameterMeters(), 0, 10000);
-        double magnitudeScore = normalize(30 - asteroid.getAbsoluteMagnitude(), 0, 30);
-        double hazardScore = asteroid.isPotentiallyHazardous() ? 0.1 : 0;
-
-        double closestApproachDistance = Double.MAX_VALUE;
-        double highestRelativeVelocity = 0;
-        for (Asteroid.CloseApproachData approachData : asteroid.getCloseApproachData()) {
-            closestApproachDistance = Math.min(closestApproachDistance, approachData.getMissDistanceKilometers());
-            highestRelativeVelocity = Math.max(highestRelativeVelocity, approachData.getRelativeVelocityKmPerSec());
-        }
-
-        double closeApproachScore = (1 - normalize(closestApproachDistance, 0, 10000000)) * 0.5 +
-                normalize(highestRelativeVelocity, 0, 50000) * 0.5;
-
-        double rawScore = (distanceScore * distanceWeight) + (velocityScore * velocityWeight) +
-                (diameterScore * diameterWeight) + (magnitudeScore * magnitudeWeight) +
-                (hazardScore * hazardWeight) + (closeApproachScore * closeApproachWeight);
-
-        return (int) Math.min(100, Math.max(1, rawScore * 100));
-    }
-
-    private Map<Asteroid, Float> calculateThreatPercentages(List<Asteroid> asteroids) {
-        Map<Asteroid, Float> threatPercentages = new HashMap<>();
-        int totalScore = 0;
-
-        // Calculate the total score from all asteroids
-        for (Asteroid asteroid : asteroids) {
-            int threatScore = calculateThreatScore(asteroid);
-            totalScore += threatScore;
-            threatPercentages.put(asteroid, (float) threatScore);
-        }
-
-        // Calculate initial percentages and total sum of these rounded percentages
-        float totalPercentage = 0f;
-        for (Asteroid asteroid : threatPercentages.keySet()) {
-            float percentage = (threatPercentages.get(asteroid) / totalScore) * 100;
-            percentage = Math.round(percentage * 10) / 10f;  // Round to one decimal
-            threatPercentages.put(asteroid, percentage);
-            totalPercentage += percentage;
-        }
-
-        // Adjust to ensure total percentage sums to exactly 100%
-        float roundingDifference = 100f - totalPercentage;
-        if (roundingDifference != 0) {
-            // Distribute rounding difference to the asteroid with the highest percentage
-            Asteroid maxAsteroid = threatPercentages.entrySet().stream()
-                    .max(Map.Entry.comparingByValue()).get().getKey();
-            threatPercentages.put(maxAsteroid, threatPercentages.get(maxAsteroid) + roundingDifference);
-        }
-
-        return threatPercentages;
-    }
-
-    private double normalize(double value, double min, double max) {
-        if (max == min) return 1;
-        return (value - min) / (max - min);
-    }
-
     private Asteroid getHighestThreatAsteroid() {
-        return asteroids.isEmpty() ? null : asteroids.stream().max((a, b) -> Integer.compare(calculateThreatScore(a), calculateThreatScore(b))).orElse(null);
+        return asteroids.isEmpty() ? null : asteroids.stream().max((a, b) -> Integer.compare(calculationHelper.calculateThreatScore(a), calculationHelper.calculateThreatScore(b))).orElse(null);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (networkReceiver != null) {
-            unregisterReceiver(networkReceiver);
-        }
+        networkHelper.unregisterNetworkReceiver();
+
     }
 }
