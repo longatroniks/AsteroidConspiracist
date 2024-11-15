@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.utils.json;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 
 public class AsteroidParser {
 

@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.utils.location;
 
 import android.Manifest;
 import android.content.Context;
@@ -9,34 +9,38 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 public class LocationRunnable implements Runnable {
 
     private static final String TAG = "LocationRunnable";
-    private FusedLocationProviderClient fusedLocationClient;
-    private Context context;
+    private final FusedLocationProviderClient fusedLocationClient;
+    private final Context context;
+    private final LocationCallback callback;
 
-    public LocationRunnable(Context context) {
+    public LocationRunnable(Context context, LocationCallback callback) {
         this.context = context;
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        this.callback = callback;
     }
 
     @Override
     public void run() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "Permisos de ubicación no concedidos.");
+            Log.e(TAG, "Location permissions not granted.");
             return;
         }
 
         fusedLocationClient.getCurrentLocation(com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener(location -> {
                     if (location != null) {
-                        Log.d(TAG, "Ubicación obtenida: " + location.getLatitude() + ", " + location.getLongitude());
-                        // Aquí podrías realizar alguna acción con la ubicación obtenida, por ejemplo, devolverla
+                        Log.d(TAG, "Location obtained: " + location.getLatitude() + ", " + location.getLongitude());
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        callback.onLocationRetrieved(latLng);
                     } else {
-                        Log.e(TAG, "Error: Ubicación es nula.");
+                        Log.e(TAG, "Error: Location is null.");
                     }
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error al obtener la ubicación.", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Error retrieving location.", e));
     }
 }

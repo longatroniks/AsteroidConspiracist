@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers;
+package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.helpers;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 
 import dte.masteriot.mdp.asteroidconspiracist.activities.ItemDetailsActivity;
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list.ListAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 
 public class OnItemActivatedListener implements androidx.recyclerview.selection.OnItemActivatedListener<Long> {
 

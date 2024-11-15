@@ -3,7 +3,6 @@ package dte.masteriot.mdp.asteroidconspiracist.services;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,8 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.utils.json.AsteroidParser;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 
 public class NeoWsAPIService {
