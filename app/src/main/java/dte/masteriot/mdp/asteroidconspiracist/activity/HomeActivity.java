@@ -1,6 +1,6 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,17 +10,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -39,14 +39,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
-import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.LegendAdapter;
-import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend.LegendItem;
-import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
-import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidCalculationHelper;
-import dte.masteriot.mdp.asteroidconspiracist.utils.LoadingStateManager;
-import dte.masteriot.mdp.asteroidconspiracist.utils.network.NetworkHelper;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.legend.LegendAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.legend.LegendItem;
+import dte.masteriot.mdp.asteroidconspiracist.util.AsteroidCalculationHelper;
+import dte.masteriot.mdp.asteroidconspiracist.util.LoadingStateManager;
+import dte.masteriot.mdp.asteroidconspiracist.util.network.NetworkHelper;
+import dte.masteriot.mdp.asteroidconspiracist.viewmodel.HomeViewModel;
 
 public class HomeActivity extends BaseActivity {
 
@@ -55,19 +54,16 @@ public class HomeActivity extends BaseActivity {
     private TextView closeApproachDetails, barChartHeading, loadingMessage;
     private ProgressBar loadingSpinner;
 
-    private List<Asteroid> asteroids = new ArrayList<>();
-
     private RecyclerView legendRecyclerView;
     private LegendAdapter legendAdapter;
 
-    private final AsteroidCalculationHelper calculationHelper = new AsteroidCalculationHelper();
-    private NetworkHelper networkHelper;
+    private AsteroidCalculationHelper calculationHelper;
     private LoadingStateManager loadingStateManager;
+    private NetworkHelper networkHelper;
+    private HomeViewModel homeViewModel;
 
     private boolean isHighlighting = false;
-    private boolean isDataLoading = true;
 
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +73,23 @@ public class HomeActivity extends BaseActivity {
         FrameLayout contentFrame = findViewById(R.id.content_frame);
         contentFrame.addView(contentView);
 
-        // Initialize UI components
+        initializeComponents();
+        setupViewModel();
+        observeViewModel();
+
+
+        fetchDataIfNeeded();
+
+        registerNetworkReceiver();
+    }
+
+    private void fetchDataIfNeeded() {
+        if (!homeViewModel.isDataLoaded()) {
+            homeViewModel.fetchAsteroids(this, networkHelper.isNetworkAvailable());
+        }
+    }
+
+    private void initializeComponents() {
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);
         closeApproachDetails = findViewById(R.id.closeApproachDetails);
@@ -85,262 +97,295 @@ public class HomeActivity extends BaseActivity {
         loadingMessage = findViewById(R.id.loadingMessage);
         loadingSpinner = findViewById(R.id.loadingSpinner);
 
+        calculationHelper = new AsteroidCalculationHelper();
         networkHelper = new NetworkHelper(this);
-        loadingStateManager = new LoadingStateManager(loadingMessage, loadingSpinner, pieChart, barChart);
+        loadingStateManager = new LoadingStateManager(loadingMessage, loadingSpinner, pieChart, barChart, closeApproachDetails, barChartHeading);
 
         loadingStateManager.showLoadingScreen();
-        registerNetworkReceiver();
-
-        fetchAsteroidData();
     }
 
-    private void registerNetworkReceiver() {
-        networkHelper.registerNetworkReceiver(() -> {
-            if (!isDataLoading) {
-                loadingMessage.setText(R.string.LOADING_MESSAGE);
-                isDataLoading = true;
-                fetchAsteroidData();
+    private void setupViewModel() {
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+    }
+
+    private void observeViewModel() {
+        homeViewModel.getAsteroidsLiveData().observe(this, asteroids -> {
+            if (asteroids != null && !asteroids.isEmpty()) {
+                loadChartData(asteroids);
+            } else {
+                Toast.makeText(this, "No asteroid data available.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        homeViewModel.getIsLoadingLiveData().observe(this, isLoading -> {
+            if (isLoading) {
+                loadingStateManager.showLoadingScreen();
+            } else {
+                loadingStateManager.hideLoadingScreen();
+            }
+        });
+
+        homeViewModel.getErrorMessageLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        homeViewModel.getDataSourceLiveData().observe(this, dataSource -> {
+            if (dataSource != null) {
+                Toast.makeText(this, "Asteroid data loaded from " + dataSource + ".", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void fetchAsteroidData() {
-        Log.d("HomeActivity", "Fetching asteroid data...");
-        List<Asteroid> asteroidList = AsteroidRepository.getInstance().getAsteroidList();
+    private void loadChartData(List<Asteroid> asteroids) {
+        Log.d("HomeActivity", "Loading chart data");
+        setupPieChart(asteroids);
+        setupBarChart(asteroids);
 
-        if (!asteroidList.isEmpty()) {
-            this.asteroids = asteroidList;
-            Log.d("HomeActivity", "Data loaded from cache. Loading charts...");
-            loadChartData();
-        } else if (networkHelper.isNetworkAvailable()) {
-            NeoWsAPIService apiService = new NeoWsAPIService();
-            apiService.fetchAndStoreAsteroids(this, new NeoWsAPIService.NeoWsAPIResponse() {
-                @Override
-                public void onResponse(boolean isFromCache) {
-                    asteroids = AsteroidRepository.getInstance().getAsteroidList();
-                    if (!asteroids.isEmpty()) {
-                        Log.d("HomeActivity", "Data fetched from API. Loading charts...");
-                        loadChartData();
-                    } else {
-                        loadingStateManager.showNetworkError("No data available.");
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e("HomeActivity", "Error fetching data: " + error);
-                    loadingStateManager.showNetworkError("Failed to fetch data.");
-                }
-            });
-        } else {
-            loadingStateManager.showNetworkError("Waiting for an internet connection...");
-        }
+        findViewById(R.id.pieChartCard).setVisibility(View.VISIBLE);
+        findViewById(R.id.barChartCard).setVisibility(View.VISIBLE);
+        findViewById(R.id.detailsCard).setVisibility(View.VISIBLE);
     }
 
-    private void loadChartData() {
-        if (!asteroids.isEmpty()) {
-            setupPieChart();
-            setupBarChart();
-            loadingStateManager.hideLoadingScreen();
-            Log.d("HomeActivity", "Charts loaded and screen displayed.");
-        } else {
-            Log.w("HomeActivity", "Asteroid data is empty; showing network error.");
-            loadingStateManager.showNetworkError("Waiting for an internet connection...");
-        }
-    }
-
-    private void setupPieChart() {
+    private void setupPieChart(List<Asteroid> asteroids) {
         Typeface spaceMonoTypeface = ResourcesCompat.getFont(this, R.font.spacemonoregular);
-        ArrayList<PieEntry> entries = new ArrayList<>();
+
+        // Prepare data for PieChart
+        List<PieEntry> entries = new ArrayList<>();
         Map<Asteroid, Float> threatPercentages = calculationHelper.calculateThreatPercentages(asteroids);
 
+        // Prepare data for legend
         List<LegendItem> legendItems = new ArrayList<>();
         int[] colors = getResources().getIntArray(R.array.earth_tones);
 
         int i = 0;
         for (Asteroid asteroid : asteroids) {
+            // Add entry for PieChart
             float percentage = threatPercentages.get(asteroid);
             entries.add(new PieEntry(percentage, asteroid.getName()));
 
-            String simplifiedName = asteroid.getName().split(" ")[1];
-            legendItems.add(new LegendItem(colors[i % colors.length], simplifiedName + " (" + String.format("%.1f", percentage) + "%)"));
+            // Simplify name for legend (e.g., use second word or entire name if single-word)
+            String simplifiedName = asteroid.getName().contains(" ") ? asteroid.getName().split(" ")[1] : asteroid.getName();
+
+            // Add entry for legend
+            legendItems.add(new LegendItem(
+                    colors[i % colors.length],
+                    simplifiedName + " (" + String.format(Locale.getDefault(), "%.1f%%", percentage) + ")"
+            ));
             i++;
         }
 
-        PieDataSet dataSet = getPieDataSet(entries, colors, spaceMonoTypeface, this);
+        if (entries.isEmpty()) {
+            Log.e("HomeActivity", "No data to populate PieChart");
+            return;
+        }
 
+        // Create PieDataSet
+        PieDataSet dataSet = new PieDataSet(entries, "Asteroid Threat");
+        dataSet.setColors(colors);
+        dataSet.setValueTextSize(14f);
+        dataSet.setValueTextColor(getResources().getColor(R.color.colorOnPrimary, null));
+        dataSet.setValueTypeface(spaceMonoTypeface);
+
+        // Format percentages
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return value >= 5.0f ? String.format(Locale.getDefault(), "%.1f%%", value) : ""; // Display only if >= 5%
+            }
+        });
+
+        // Create PieData
         PieData pieData = new PieData(dataSet);
         pieChart.setData(pieData);
+
+        // PieChart appearance and settings
         pieChart.setDrawHoleEnabled(false);
         pieChart.setUsePercentValues(true);
-
         pieChart.getDescription().setEnabled(false);
-        pieChart.setDrawEntryLabels(false);
-        pieChart.getLegend().setEnabled(false);
+        pieChart.setDrawEntryLabels(false); // No labels on slices
+        pieChart.getLegend().setEnabled(false); // Use custom RecyclerView for legend
+        pieChart.setTouchEnabled(true); // Enable interaction
+        pieChart.setHighlightPerTapEnabled(true); // Enable highlighting on tap
 
-        // Set description and entry label colors
+        // Set text and entry label styling
         int colorOnSurface = ResourcesCompat.getColor(getResources(), R.color.colorOnSurface, null);
         pieChart.setEntryLabelColor(colorOnSurface);
         pieChart.setEntryLabelTypeface(spaceMonoTypeface);
-        pieChart.getDescription().setTypeface(spaceMonoTypeface);
-        pieChart.getLegend().setTypeface(spaceMonoTypeface);
 
+        // Setup RecyclerView for the legend
         legendRecyclerView = findViewById(R.id.legendRecyclerView);
-        legendAdapter = new LegendAdapter(legendItems, this::onLegendItemSelected);
+        legendAdapter = new LegendAdapter(legendItems, index -> {
+            if (!isHighlighting) {
+                isHighlighting = true;
+
+                // Highlight the selected PieChart slice
+                pieChart.highlightValue(index, 0);
+
+                // Update BarChart and scroll legend
+                updateBarChartForSelectedAsteroid(asteroids.get(index));
+                legendRecyclerView.smoothScrollToPosition(index);
+
+                isHighlighting = false;
+            }
+        });
+
         legendRecyclerView.setAdapter(legendAdapter);
         legendRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Handle PieChart slice selection
         pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
                 if (!isHighlighting) {
                     isHighlighting = true;
-                    int index = (int) h.getX();
-                    onLegendItemSelected(index);
-                    updateBarChartForSelectedAsteroid(asteroids.get(index));
+
+                    // Update based on the selected slice
+                    int selectedIndex = (int) h.getX();
+                    updateBarChartForSelectedAsteroid(asteroids.get(selectedIndex));
+
+                    // Highlight corresponding legend item
+                    legendRecyclerView.smoothScrollToPosition(selectedIndex);
+                    legendAdapter.notifyDataSetChanged();
+
                     isHighlighting = false;
                 }
             }
 
             @Override
             public void onNothingSelected() {
-                // Reset selection if needed
+                // Reset logic if nothing is selected
             }
         });
 
-        pieChart.invalidate();
+        // Finalize chart setup
+        pieChart.invalidate(); // Refresh chart
     }
 
-    private static @NonNull PieDataSet getPieDataSet(ArrayList<PieEntry> entries, int[] colors, Typeface spaceMonoTypeface, Context context) {
-        PieDataSet dataSet = new PieDataSet(entries, "Asteroid Impact Threat");
-        dataSet.setColors(colors);
-        // Use context to access the color resource
-        dataSet.setValueTextColor(ResourcesCompat.getColor(context.getResources(), R.color.colorOnPrimary, null));
-        dataSet.setValueTextSize(16f);
-        dataSet.setValueTypeface(spaceMonoTypeface);
 
-        dataSet.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return value < 5.0f ? "" : String.format("%.1f%%", value);
-            }
-        });
-        return dataSet;
-    }
-
-    private void onLegendItemSelected(int index) {
-        if (!isHighlighting) {
-            isHighlighting = true;
-            pieChart.highlightValue(index, 0);
-            legendRecyclerView.smoothScrollToPosition(index);
-            legendAdapter.notifyDataSetChanged();
-            updateBarChartForSelectedAsteroid(asteroids.get(index));
-            isHighlighting = false;
-        }
-    }
-
-    private void setupBarChart() {
+    private void setupBarChart(List<Asteroid> asteroids) {
         Typeface spaceMonoTypeface = ResourcesCompat.getFont(this, R.font.spacemonoregular);
+
+        // Get the default asteroid (highest threat) to display initially
+        Asteroid defaultAsteroid = calculationHelper.getHighestThreatAsteroid(asteroids);
+
+        // BarChart appearance settings
         int[] colors = getResources().getIntArray(R.array.earth_tones);
         int colorOnSurfaceVariant = ResourcesCompat.getColor(getResources(), R.color.colorOnSurfaceVariant, null);
 
-        barChart.getDescription().setEnabled(false);
-        barChart.getAxisLeft().setEnabled(false);
-        barChart.getAxisRight().setEnabled(false);
-        barChart.getXAxis().setDrawGridLines(false);
-        barChart.getXAxis().setDrawAxisLine(true);
-        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        barChart.getDescription().setEnabled(false); // Hide description
+        barChart.getAxisLeft().setEnabled(false); // Disable left axis
+        barChart.getAxisRight().setEnabled(false); // Disable right axis
+        barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM); // X-axis at the bottom
+        barChart.getXAxis().setDrawGridLines(false); // No grid lines
+        barChart.getXAxis().setDrawAxisLine(true); // Show axis line
+        barChart.getXAxis().setTypeface(spaceMonoTypeface); // Use consistent typeface for labels
+        barChart.getXAxis().setTextColor(colorOnSurfaceVariant); // Set text color for X-axis
 
-        // Set color and font for X-axis labels
-        barChart.getXAxis().setTextColor(colorOnSurfaceVariant);
-        barChart.getXAxis().setTypeface(spaceMonoTypeface);
+        barChart.getLegend().setEnabled(false); // Disable chart legend
+        barChart.setDoubleTapToZoomEnabled(false); // Disable zooming via double-tap
+        barChart.setScaleEnabled(false); // Disable scaling
+        barChart.setDragEnabled(true); // Enable horizontal drag
+        barChart.setVisibleXRangeMaximum(3); // Display up to 3 bars at once
 
-        barChart.getLegend().setEnabled(false);
-        barChart.setDoubleTapToZoomEnabled(false);
-        barChart.setScaleEnabled(false);
-
-        // Set color and font for description text
-        barChart.getDescription().setTextColor(colorOnSurfaceVariant);
-        barChart.getDescription().setTypeface(spaceMonoTypeface);
-
-        BarDataSet dataSet = new BarDataSet(new ArrayList<>(), "Next Close Approaches");
-        dataSet.setColors(colors);
-
-        // Set color and font for bar values
-        dataSet.setValueTextColor(colorOnSurfaceVariant);
-        dataSet.setValueTextSize(10f);
-        dataSet.setValueTypeface(spaceMonoTypeface);
-
-        BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.8f);
-        barChart.setData(barData);
-
-        // Display default asteroid's data if available
-        Asteroid defaultAsteroid = getHighestThreatAsteroid();
+        // Default asteroid data in the BarChart
         updateBarChartForSelectedAsteroid(defaultAsteroid);
 
+        // Display details for the default asteroid's closest approach
         if (defaultAsteroid != null && !defaultAsteroid.getCloseApproachData().isEmpty()) {
             displayCloseApproachDetails(defaultAsteroid, defaultAsteroid.getCloseApproachData().get(0));
         }
 
-        barChart.invalidate(); // Refresh the chart to apply settings
+        // Refresh chart to apply all settings
+        barChart.invalidate();
+    }
+
+    private String formatDate(String date) {
+        try {
+            return new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                    .format(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date));
+        } catch (Exception e) {
+            return date;
+        }
     }
 
     private void updateBarChartForSelectedAsteroid(Asteroid asteroid) {
         if (asteroid == null) {
-            Toast.makeText(HomeActivity.this, "No asteroid data to display in bar chart.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No asteroid data to display in bar chart.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        List<String> closeApproachDates = new ArrayList<>();
+        // Prepare BarChart entries and labels for the X-axis
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
         int[] colors = getResources().getIntArray(R.array.earth_tones);
         int colorOnSurfaceVariant = ResourcesCompat.getColor(getResources(), R.color.colorOnSurfaceVariant, null);
 
-        String simplifiedName = asteroid.getName().split(" ")[1];
-        barChartHeading.setText(String.format("Upcoming for %s", simplifiedName));
-
-        Date today = new Date();
+        // Filter and sort the close approach data
         List<Asteroid.CloseApproachData> upcomingApproaches = asteroid.getCloseApproachData().stream()
                 .filter(approachData -> {
                     try {
-                        return new SimpleDateFormat("yyyy-MM-dd").parse(approachData.getDate()).after(today);
+                        // Only include future approaches
+                        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                .parse(approachData.getDate()).after(new Date());
                     } catch (Exception e) {
                         return false;
                     }
                 })
-                .sorted((a, b) -> a.getDate().compareTo(b.getDate()))
-                .limit(3)
+                .sorted((a, b) -> a.getDate().compareTo(b.getDate())) // Sort by date
+                .limit(3) // Display only the closest 3 approaches
                 .collect(Collectors.toList());
 
-        int i = 0;
-        for (Asteroid.CloseApproachData approachData : upcomingApproaches) {
+        // Populate entries and labels
+        for (int i = 0; i < upcomingApproaches.size(); i++) {
+            Asteroid.CloseApproachData approachData = upcomingApproaches.get(i);
+
             entries.add(new BarEntry(i, (float) approachData.getMissDistanceKilometers()));
-            closeApproachDates.add(formatDate(approachData.getDate()));  // Ensure only needed dates are added
-            i++;
+            labels.add(formatDate(approachData.getDate())); // Add formatted date as X-axis label
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Next Close Approaches");
+        if (entries.isEmpty()) {
+            Log.e("HomeActivity", "No valid close approach data for BarChart");
+            barChart.clear(); // Clear chart if no data
+            return;
+        }
+
+        // Update BarChart heading
+        String simplifiedName = asteroid.getName().contains(" ") ? asteroid.getName().split(" ")[1] : asteroid.getName();
+        barChartHeading.setText(String.format("Upcoming Close Approaches for %s", simplifiedName));
+
+        // Create BarDataSet for the chart
+        BarDataSet dataSet = new BarDataSet(entries, "Miss Distances");
         dataSet.setColors(colors);
-        dataSet.setValueTextColor(colorOnSurfaceVariant);  // Set color for the distance values
+        dataSet.setValueTextColor(colorOnSurfaceVariant); // Set color for values
         dataSet.setValueTextSize(10f);
         dataSet.setDrawValues(true);
 
+        // Create BarData and assign it to the chart
         BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.8f);
+        barData.setBarWidth(0.8f); // Set bar width
         barChart.setData(barData);
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(closeApproachDates));  // Match exactly
-        barChart.getXAxis().setLabelCount(entries.size());  // Ensure label count matches entry count
-        barChart.getXAxis().setTextColor(colorOnSurfaceVariant);  // Set color for date labels
+
+        // Update X-axis labels
+        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        barChart.getXAxis().setLabelCount(labels.size());
+        barChart.getXAxis().setTextColor(colorOnSurfaceVariant);
+
+        // Configure the chart for interactivity
         barChart.setDragEnabled(true);
-        barChart.setVisibleXRangeMaximum(3);
+        barChart.setVisibleXRangeMaximum(3); // Show a maximum of 3 bars at a time
+
+        // Refresh the BarChart to apply changes
         barChart.invalidate();
 
+        // Add interaction for displaying close approach details
         barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
                 int entryIndex = (int) e.getX();
                 if (entryIndex < upcomingApproaches.size()) {
+                    // Display details for the selected close approach
                     Asteroid.CloseApproachData selectedData = upcomingApproaches.get(entryIndex);
                     displayCloseApproachDetails(asteroid, selectedData);
                 }
@@ -349,8 +394,8 @@ public class HomeActivity extends BaseActivity {
             @Override
             public void onNothingSelected() {
                 if (!upcomingApproaches.isEmpty()) {
-                    Asteroid.CloseApproachData defaultCloseApproach = upcomingApproaches.get(0);
-                    displayCloseApproachDetails(asteroid, defaultCloseApproach);
+                    // Display details for the first close approach if nothing is selected
+                    displayCloseApproachDetails(asteroid, upcomingApproaches.get(0));
                 } else {
                     closeApproachDetails.setText("No close approaches available for the selected asteroid.");
                 }
@@ -359,44 +404,38 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void displayCloseApproachDetails(Asteroid asteroid, Asteroid.CloseApproachData closeApproachData) {
-        String details = "Close Approach of " + asteroid.getName() + ":\n\n" +
-                "On " + formatDate(closeApproachData.getDateFull()) + ", this asteroid will approach Earth with a closest miss distance of approximately " +
-                abbreviateNumber(closeApproachData.getMissDistanceKilometers()) + " kilometers, which is about " +
-                String.format("%.3f", closeApproachData.getMissDistanceAstronomical()) + " Astronomical Units or " +
-                String.format("%.3f", closeApproachData.getMissDistanceLunar()) + " times the distance between Earth and the Moon.\n\n" +
-                "The asteroid will be traveling at a relative speed of " + String.format("%.3f", closeApproachData.getRelativeVelocityKmPerSec()) +
-                " kilometers per second (" + String.format("%.3f", closeApproachData.getRelativeVelocityMilesPerHour()) +
-                " miles per hour) as it passes by.\n\n" +
-                "This close approach will occur with " + closeApproachData.getOrbitingBody() +
-                " as the primary orbiting body in relation to this asteroid.";
+        @SuppressLint("DefaultLocale") String details = String.format(
+                "Close Approach of %s:\n\nOn %s, this asteroid will approach Earth with a miss distance of approximately %.1f kilometers (%.3f AU, %.3f lunar distances).\n\n" +
+                        "The asteroid will be traveling at a speed of %.1f km/s (%.1f mph) relative to Earth.\n\n" +
+                        "Orbiting Body: %s.",
+                asteroid.getName(),
+                formatDate(closeApproachData.getDate()),
+                closeApproachData.getMissDistanceKilometers(),
+                closeApproachData.getMissDistanceAstronomical(),
+                closeApproachData.getMissDistanceLunar(),
+                closeApproachData.getRelativeVelocityKmPerSec(),
+                closeApproachData.getRelativeVelocityMilesPerHour(),
+                closeApproachData.getOrbitingBody()
+        );
 
         closeApproachDetails.setText(details);
     }
 
-
-    private String formatDate(String date) {
-        try {
-            return dateFormatter.format(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date));
-        } catch (Exception e) {
-            return date;
-        }
-    }
-
-    private String abbreviateNumber(double value) {
-        if (value >= 1_000_000_000) return String.format("%.1fB", value / 1_000_000_000);
-        if (value >= 1_000_000) return String.format("%.1fM", value / 1_000_000);
-        if (value >= 1_000) return String.format("%.1fK", value / 1_000);
-        return String.format("%.1f", value);
-    }
-
-    private Asteroid getHighestThreatAsteroid() {
-        return asteroids.isEmpty() ? null : asteroids.stream().max((a, b) -> Integer.compare(calculationHelper.calculateThreatScore(a), calculationHelper.calculateThreatScore(b))).orElse(null);
+    private void registerNetworkReceiver() {
+        networkHelper.registerNetworkReceiver(() -> {
+            if (homeViewModel.getAsteroidsLiveData().getValue() == null
+                    || homeViewModel.getAsteroidsLiveData().getValue().isEmpty()) {
+                // Fetch data when the network becomes available
+                homeViewModel.fetchAsteroids(this, true);
+            } else {
+                Toast.makeText(this, "Network unavailable. Please check your connection.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         networkHelper.unregisterNetworkReceiver();
-
     }
 }

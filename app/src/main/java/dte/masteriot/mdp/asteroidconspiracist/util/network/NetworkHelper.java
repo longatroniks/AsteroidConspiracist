@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils.network;
+package dte.masteriot.mdp.asteroidconspiracist.util.network;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

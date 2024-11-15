@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,16 +7,22 @@ import android.preference.PreferenceManager;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.viewmodel.ItemDetailsViewModel;
 
 public class ItemDetailsActivity extends AppCompatActivity {
 
     private TextView nameView, distanceView, maxDiameterView, minDiameterView,
             velocityView, magnitudeView, hazardousView, orbitIdView,
             semiMajorAxisView, nasaJplUrlView;
+
+    private ItemDetailsViewModel viewModel;
+
     private static final String PREF_HIGH_CONTRAST_MODE = "high_contrast_mode";
 
     @Override
@@ -39,22 +45,53 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         // Set up back button
         ExtendedFloatingActionButton backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> finish()); // Finish activity to go back
+        backButton.setOnClickListener(v -> finish());
 
-        // Retrieve data from intent and set it in the TextViews
+        // Initialize ViewModel
+        viewModel = new ViewModelProvider(this).get(ItemDetailsViewModel.class);
+
+        // Observe the asteroid data
+        viewModel.getAsteroid().observe(this, asteroid -> {
+            if (asteroid != null) {
+                updateUIWithAsteroidDetails(asteroid);
+            }
+        });
+
+        // Load asteroid data from the intent
+        loadAsteroidDataFromIntent();
+    }
+
+    private void loadAsteroidDataFromIntent() {
         Intent intent = getIntent();
         if (intent != null) {
-            nameView.setText(intent.getStringExtra("asteroid_name"));
-            distanceView.setText(String.format("Distance: %.3f km", intent.getDoubleExtra("asteroid_distance", 0)));
-            maxDiameterView.setText(String.format("Max Diameter: %.3f km", intent.getDoubleExtra("asteroid_max_diameter", 0)));
-            minDiameterView.setText(String.format("Min Diameter: %.3f km", intent.getDoubleExtra("asteroid_min_diameter", 0)));
-            velocityView.setText(String.format("Velocity: %.3f km/h", intent.getDoubleExtra("asteroid_velocity", 0)));
-            magnitudeView.setText(String.format("Absolute Magnitude: %.3f", intent.getDoubleExtra("asteroid_absolute_magnitude", 0)));
-            hazardousView.setText("Potentially Hazardous: " + (intent.getBooleanExtra("asteroid_is_hazardous", false) ? "Yes" : "No"));
-            orbitIdView.setText("Orbit ID: " + intent.getStringExtra("asteroid_orbit_id"));
-            semiMajorAxisView.setText(String.format("Semi-Major Axis: %.3f", intent.getDoubleExtra("asteroid_semi_major_axis", 0)));
-            nasaJplUrlView.setText("NASA JPL URL: " + intent.getStringExtra("asteroid_nasa_jpl_url"));
+            Asteroid asteroid = new Asteroid();
+            asteroid.setName(intent.getStringExtra("asteroid_name"));
+            asteroid.setDistance(intent.getDoubleExtra("asteroid_distance", 0));
+            asteroid.setMaxDiameter(intent.getDoubleExtra("asteroid_max_diameter", 0));
+            asteroid.setMinDiameter(intent.getDoubleExtra("asteroid_min_diameter", 0));
+            asteroid.setVelocity(intent.getDoubleExtra("asteroid_velocity", 0));
+            asteroid.setAbsoluteMagnitude(intent.getDoubleExtra("asteroid_absolute_magnitude", 0));
+            asteroid.setPotentiallyHazardous(intent.getBooleanExtra("asteroid_is_hazardous", false));
+            asteroid.setOrbitId(intent.getStringExtra("asteroid_orbit_id"));
+            asteroid.setSemiMajorAxis(intent.getDoubleExtra("asteroid_semi_major_axis", 0));
+            asteroid.setNasaJplUrl(intent.getStringExtra("asteroid_nasa_jpl_url"));
+
+            // Pass the asteroid data to the ViewModel
+            viewModel.setAsteroid(asteroid);
         }
+    }
+
+    private void updateUIWithAsteroidDetails(Asteroid asteroid) {
+        nameView.setText(asteroid.getName());
+        distanceView.setText(String.format("Distance: %.3f km", asteroid.getDistance()));
+        maxDiameterView.setText(String.format("Max Diameter: %.3f km", asteroid.getMaxDiameter()));
+        minDiameterView.setText(String.format("Min Diameter: %.3f km", asteroid.getMinDiameter()));
+        velocityView.setText(String.format("Velocity: %.3f km/h", asteroid.getVelocity()));
+        magnitudeView.setText(String.format("Absolute Magnitude: %.3f", asteroid.getAbsoluteMagnitude()));
+        hazardousView.setText("Potentially Hazardous: " + (asteroid.isPotentiallyHazardous() ? "Yes" : "No"));
+        orbitIdView.setText("Orbit ID: " + asteroid.getOrbitId());
+        semiMajorAxisView.setText(String.format("Semi-Major Axis: %.3f", asteroid.getSemiMajorAxis()));
+        nasaJplUrlView.setText("NASA JPL URL: " + asteroid.getNasaJplUrl());
     }
 
     private void applyHighContrastTheme() {

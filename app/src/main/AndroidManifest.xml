@@ -19,7 +19,7 @@
         android:usesCleartextTraffic="false"
         tools:targetApi="31">
         <activity
-            android:name=".activities.AddShelterActivity"
+            android:name=".activity.AddShelterActivity"
             android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
@@ -37,23 +37,23 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".activities.MapsActivity"
+            android:name=".activity.MapsActivity"
             android:exported="true"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".activities.HomeActivity"
+            android:name=".activity.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.CompassActivity"
+            android:name=".activity.CompassActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ListActivity"
+            android:name=".activity.ListActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ItemDetailsActivity"
+            android:name=".activity.ItemDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.IntroActivity"
+            android:name=".activity.IntroActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

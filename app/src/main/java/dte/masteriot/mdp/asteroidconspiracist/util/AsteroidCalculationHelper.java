@@ -1,10 +1,10 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.util;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Asteroid;
 
 public class AsteroidCalculationHelper {
 
@@ -90,5 +90,9 @@ public class AsteroidCalculationHelper {
     public double normalize(double value, double min, double max) {
         if (max == min) return 1;
         return (value - min) / (max - min);
+    }
+
+    public Asteroid getHighestThreatAsteroid(List<Asteroid> asteroids) {
+        return asteroids.isEmpty() ? null : asteroids.stream().max((a, b) -> Integer.compare(calculateThreatScore(a), calculateThreatScore(b))).orElse(null);
     }
 }

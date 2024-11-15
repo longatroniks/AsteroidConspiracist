@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities.modals;
+package dte.masteriot.mdp.asteroidconspiracist.activity.modal;
 
 import android.app.Dialog;
 import android.content.Context;

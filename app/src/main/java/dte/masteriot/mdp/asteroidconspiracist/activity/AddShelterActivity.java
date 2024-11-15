@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.Manifest;
 import android.content.SharedPreferences;

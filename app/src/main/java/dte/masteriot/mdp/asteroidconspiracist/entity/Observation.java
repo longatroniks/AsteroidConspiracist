@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.entities;
+package dte.masteriot.mdp.asteroidconspiracist.entity;
 
 import com.google.android.gms.maps.model.LatLng;
 

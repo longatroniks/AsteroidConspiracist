@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.legend;
+package dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.legend;
 
 import android.view.LayoutInflater;
 import android.view.View;

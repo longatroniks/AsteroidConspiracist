@@ -1,5 +1,6 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils;
+package dte.masteriot.mdp.asteroidconspiracist.util;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,15 +26,13 @@ public class LoadingStateManager {
     }
 
     public void hideLoadingScreen() {
+        Log.d("LoadingStateManager", "Hiding loading screen");
         loadingMessage.setVisibility(View.GONE);
         loadingSpinner.setVisibility(View.GONE);
         for (View view : chartViews) {
+            Log.d("LoadingStateManager", "Making view visible: " + view.getId());
             view.setVisibility(View.VISIBLE);
         }
     }
 
-    public void showNetworkError(String message) {
-        loadingMessage.setText(message);
-        loadingSpinner.setVisibility(View.GONE);
-    }
 }

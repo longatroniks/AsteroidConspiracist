@@ -1,10 +1,8 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
