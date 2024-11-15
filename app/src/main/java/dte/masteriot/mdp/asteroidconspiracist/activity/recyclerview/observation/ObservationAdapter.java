@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.observation;
+package dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.observation;
 
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.entities.Observation;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Observation;
 
 public class ObservationAdapter extends RecyclerView.Adapter<ObservationAdapter.ObservationViewHolder> {
 

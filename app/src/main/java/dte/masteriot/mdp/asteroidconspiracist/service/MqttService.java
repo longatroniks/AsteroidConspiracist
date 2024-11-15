@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.services;
+package dte.masteriot.mdp.asteroidconspiracist.service;
 
 import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;

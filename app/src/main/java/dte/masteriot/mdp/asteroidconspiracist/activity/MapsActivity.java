@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -27,11 +27,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.activities.modals.ObservationModal;
-import dte.masteriot.mdp.asteroidconspiracist.entities.Observation;
-import dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.observation.ObservationPagerAdapter;
-import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.file.FileUtils;
+import dte.masteriot.mdp.asteroidconspiracist.activity.modal.ObservationModal;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Observation;
+import dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.observation.ObservationPagerAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.service.MqttService;
+import dte.masteriot.mdp.asteroidconspiracist.util.file.FileUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

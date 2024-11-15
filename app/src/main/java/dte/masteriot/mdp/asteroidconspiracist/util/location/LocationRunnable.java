@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils.location;
+package dte.masteriot.mdp.asteroidconspiracist.util.location;
 
 import android.Manifest;
 import android.content.Context;

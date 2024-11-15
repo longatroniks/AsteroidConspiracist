@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.utils.file;
+package dte.masteriot.mdp.asteroidconspiracist.util.file;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import dte.masteriot.mdp.asteroidconspiracist.entities.Observation;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Observation;
 
 public class FileUtils {
 

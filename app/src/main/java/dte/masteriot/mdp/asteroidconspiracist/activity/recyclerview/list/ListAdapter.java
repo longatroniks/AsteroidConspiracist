@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities.recyclerview.list;
+package dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.list;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Asteroid;
 
 public class ListAdapter extends RecyclerView.Adapter<ListViewHolder> {
 

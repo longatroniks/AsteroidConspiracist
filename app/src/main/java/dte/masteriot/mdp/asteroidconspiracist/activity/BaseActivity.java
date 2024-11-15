@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.activities;
+package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,13 +11,17 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.navigation.NavigationView;
 import dte.masteriot.mdp.asteroidconspiracist.R;
+import dte.masteriot.mdp.asteroidconspiracist.viewmodel.BaseViewModel;
 
 public class BaseActivity extends AppCompatActivity {
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
     protected Toolbar toolbar;
+    private BaseViewModel baseViewModel;
+
     private static final String PREF_HIGH_CONTRAST_MODE = "high_contrast_mode";
 
     @Override
@@ -26,6 +30,8 @@ public class BaseActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+
+        baseViewModel = new ViewModelProvider(this).get(BaseViewModel.class);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,6 +49,16 @@ public class BaseActivity extends AppCompatActivity {
         setupNavigationMenu();
         setupHighContrastSwitch();
         setActivityTitle();
+
+        observeViewModel();
+    }
+
+    private void observeViewModel() {
+        baseViewModel.getHighContrastMode().observe(this, isEnabled -> {
+            // React to high contrast mode changes if needed
+            applyThemeBasedOnSettings();
+            recreate(); // Restart activity to apply the new theme
+        });
     }
 
     private void setActivityTitle() {
@@ -109,8 +125,7 @@ public class BaseActivity extends AppCompatActivity {
         // Set listener to toggle high contrast mode
         highContrastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean(PREF_HIGH_CONTRAST_MODE, isChecked).apply();
-            applyThemeBasedOnSettings();
-            recreate(); // Restart activity to apply the new theme
+            baseViewModel.setHighContrastMode(isChecked);
         });
     }
 
@@ -134,7 +149,6 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    // Method to enable or disable the back button
     protected void enableBackButton(boolean enableBack) {
         if (getSupportActionBar() != null) {
             if (enableBack) {
@@ -165,10 +179,4 @@ public class BaseActivity extends AppCompatActivity {
         onBackPressed();
         return true;
     }
-
-    public void settingUFOLocation(View view) {
-        Intent intent = new Intent(this, MapsActivity.class);
-        startActivity(intent);
-    }
-
 }
