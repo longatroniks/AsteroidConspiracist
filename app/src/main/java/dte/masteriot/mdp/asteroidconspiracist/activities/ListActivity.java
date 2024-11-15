@@ -8,11 +8,9 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,11 +26,9 @@ import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.ItemKeyP
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
 import dte.masteriot.mdp.asteroidconspiracist.services.MqttService;
-import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.helpers.OnItemActivatedListener;
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.services.NeoWsAPIService;
-import dte.masteriot.mdp.asteroidconspiracist.utils.AsteroidParser;
 
 public class ListActivity extends BaseActivity {
 
@@ -81,19 +77,6 @@ public class ListActivity extends BaseActivity {
 
         fetchAsteroids();
 
-        // MQTT Connection
-        mqttService.createMQTTclient();
-        mqttService.connectToBroker("Publishing UFO").thenAccept(isConnected -> {
-            if (isConnected) {
-                Log.d(TAG, "Successfully connected to the broker.");
-                bBrokerConnected = true;
-            } else {
-                Log.d(TAG, "Failed to connect to the broker.");
-                bBrokerConnected = false;
-            }
-        });
-
-        //
     }
 
     @Override
@@ -105,7 +88,6 @@ public class ListActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mqttService.disconnectFromBroker();
     }
 
     private void fetchAsteroids() {
@@ -115,9 +97,7 @@ public class ListActivity extends BaseActivity {
                 List<Asteroid> asteroids = AsteroidRepository.getInstance().getAsteroidList();
                 runOnUiThread(() -> {
                     listAdapter.updateData(asteroids);
-                    if (bBrokerConnected) {
-                        mqttService.PublishAsteroidInfo(asteroids);
-                    }
+
                     if (isFromCache) {
                         Toast.makeText(ListActivity.this, "Loaded data from saved cache.", Toast.LENGTH_LONG).show();
                     }
@@ -135,9 +115,6 @@ public class ListActivity extends BaseActivity {
     private void updateAsteroidList(List<Asteroid> asteroidList) {
         runOnUiThread(() -> {
             listAdapter.updateData(asteroidList);
-            if (bBrokerConnected) {
-                mqttService.PublishAsteroidInfo(asteroidList);
-            }
         });
     }
 

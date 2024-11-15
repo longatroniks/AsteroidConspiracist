@@ -1,4 +1,4 @@
-package dte.masteriot.mdp.asteroidconspiracist.models;
+package dte.masteriot.mdp.asteroidconspiracist.entities;
 
 import java.util.List;
 

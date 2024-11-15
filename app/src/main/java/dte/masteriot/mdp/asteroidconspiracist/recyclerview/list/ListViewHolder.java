@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.Locale;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 
 public class ListViewHolder extends RecyclerView.ViewHolder {
 

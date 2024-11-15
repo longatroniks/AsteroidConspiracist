@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 
 import dte.masteriot.mdp.asteroidconspiracist.activities.ItemDetailsActivity;
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.list.ListAdapter;
 
 public class OnItemActivatedListener implements androidx.recyclerview.selection.OnItemActivatedListener<Long> {

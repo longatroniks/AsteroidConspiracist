@@ -1,10 +1,17 @@
 package dte.masteriot.mdp.asteroidconspiracist.activities;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.models.Asteroid;
+import dte.masteriot.mdp.asteroidconspiracist.entities.Asteroid;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendAdapter;
 import dte.masteriot.mdp.asteroidconspiracist.recyclerview.legend.LegendItem;
 import dte.masteriot.mdp.asteroidconspiracist.repos.AsteroidRepository;
@@ -48,13 +55,15 @@ public class HomeActivity extends BaseActivity {
 
     private PieChart pieChart;
     private BarChart barChart;
-    private TextView closeApproachDetails;
-    private TextView barChartHeading;
+    private TextView closeApproachDetails, barChartHeading, loadingMessage;
+    private ProgressBar loadingSpinner;
     private List<Asteroid> asteroids = new ArrayList<>();
     private RecyclerView legendRecyclerView;
     private LegendAdapter legendAdapter;
     private boolean isHighlighting = false;
+    private boolean isDataLoading = true;
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+    private BroadcastReceiver networkReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,40 +73,110 @@ public class HomeActivity extends BaseActivity {
         FrameLayout contentFrame = findViewById(R.id.content_frame);
         contentFrame.addView(contentView);
 
+        // Initialize UI components
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);
         closeApproachDetails = findViewById(R.id.closeApproachDetails);
         barChartHeading = findViewById(R.id.barChartHeading);
+        loadingMessage = findViewById(R.id.loadingMessage);
+        loadingSpinner = findViewById(R.id.loadingSpinner);
+
+        showLoadingScreen();
+        registerNetworkReceiver();
 
         fetchAsteroidData();
     }
 
+    private void showLoadingScreen() {
+        loadingMessage.setVisibility(View.VISIBLE);
+        loadingSpinner.setVisibility(View.VISIBLE);
+        pieChart.setVisibility(View.GONE);
+        barChart.setVisibility(View.GONE);
+    }
+
+    private void hideLoadingScreen() {
+        loadingMessage.setVisibility(View.GONE);
+        loadingSpinner.setVisibility(View.GONE);
+
+        // Make sure chart views are visible
+        findViewById(R.id.pieChartCard).setVisibility(View.VISIBLE);
+        findViewById(R.id.barChartCard).setVisibility(View.VISIBLE);
+        findViewById(R.id.detailsCard).setVisibility(View.VISIBLE);
+        pieChart.setVisibility(View.VISIBLE);
+        barChart.setVisibility(View.VISIBLE);
+    }
+
 
     private void fetchAsteroidData() {
+        Log.d("HomeActivity", "Fetching asteroid data...");
         List<Asteroid> asteroidList = AsteroidRepository.getInstance().getAsteroidList();
+
         if (!asteroidList.isEmpty()) {
             this.asteroids = asteroidList;
-            setupPieChart();
-            setupBarChart();
-        } else {
+            Log.d("HomeActivity", "Data loaded from cache. Loading charts...");
+            loadChartData();
+        } else if (isNetworkAvailable()) {
             NeoWsAPIService apiService = new NeoWsAPIService();
             apiService.fetchAndStoreAsteroids(this, new NeoWsAPIService.NeoWsAPIResponse() {
                 @Override
                 public void onResponse(boolean isFromCache) {
                     asteroids = AsteroidRepository.getInstance().getAsteroidList();
-                    setupPieChart();
-                    setupBarChart();
-                    if (isFromCache) {
-                        Toast.makeText(HomeActivity.this, "Loaded data from saved cache.", Toast.LENGTH_LONG).show();
+                    if (!asteroids.isEmpty()) {
+                        Log.d("HomeActivity", "Data fetched from API. Loading charts...");
+                        loadChartData();
+                    } else {
+                        showNetworkError();
                     }
                 }
 
                 @Override
                 public void onError(String error) {
-                    Toast.makeText(HomeActivity.this, "Error fetching asteroid data: " + error, Toast.LENGTH_LONG).show();
+                    Log.e("HomeActivity", "Error fetching data: " + error);
+                    showNetworkError();
                 }
             });
+        } else {
+            showNetworkError();
         }
+    }
+
+    private void loadChartData() {
+        if (!asteroids.isEmpty()) {
+            setupPieChart();
+            setupBarChart();
+            hideLoadingScreen();
+            Log.d("HomeActivity", "Charts loaded and screen displayed.");
+        } else {
+            Log.w("HomeActivity", "Asteroid data is empty; showing network error.");
+            showNetworkError();
+        }
+    }
+
+
+    private void showNetworkError() {
+        loadingMessage.setText("Waiting for an internet connection...");
+        isDataLoading = false;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+
+    private void registerNetworkReceiver() {
+        networkReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!isDataLoading && isNetworkAvailable()) {
+                    loadingMessage.setText("Calculations are being made...");
+                    isDataLoading = true;
+                    fetchAsteroidData();
+                }
+            }
+        };
+        registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private void setupPieChart() {
@@ -410,5 +489,13 @@ public class HomeActivity extends BaseActivity {
 
     private Asteroid getHighestThreatAsteroid() {
         return asteroids.isEmpty() ? null : asteroids.stream().max((a, b) -> Integer.compare(calculateThreatScore(a), calculateThreatScore(b))).orElse(null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (networkReceiver != null) {
+            unregisterReceiver(networkReceiver);
+        }
     }
 }

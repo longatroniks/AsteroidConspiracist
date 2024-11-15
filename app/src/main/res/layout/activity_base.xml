@@ -19,8 +19,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/android:windowBackground"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+                android:background="?attr/android:windowBackground"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 

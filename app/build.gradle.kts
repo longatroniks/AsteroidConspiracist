@@ -63,6 +63,10 @@ dependencies {
     implementation("com.hivemq:hivemq-mqtt-client:1.3.3")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("com.github.tony19:logback-android:2.0.0")
+
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

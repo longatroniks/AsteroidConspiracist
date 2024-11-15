@@ -16,7 +16,7 @@
         <item name="android:textColorSecondary">@color/text_secondary_light</item>
         <item name="android:textColorHint">@color/text_disabled_light</item>
         <item name="cardBackgroundColor">@color/card_light</item>
-        <item name="android:statusBarColor">@color/status_bar_light</item>
+        <item name="android:statusBarColor">@color/primary_variant</item>
         <item name="android:navigationBarColor">@color/light_background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="colorControlHighlight">@color/ripple_light</item>
