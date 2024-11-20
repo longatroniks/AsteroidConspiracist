@@ -25,19 +25,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Toggle Button for Observations Subscription -->
-            <Button
-                android:id="@+id/btnToggleObservations"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Subscribe"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="?attr/colorOnPrimary"
-                android:backgroundTint="?attr/colorPrimary"
-                app:cornerRadius="16dp"
-                android:layout_marginBottom="12dp" />
-
             <!-- ViewPager2 to Swipe Through Observations -->
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/observationViewPager"

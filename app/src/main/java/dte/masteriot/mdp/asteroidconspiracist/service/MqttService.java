@@ -1,43 +1,65 @@
 package dte.masteriot.mdp.asteroidconspiracist.service;
 
 import android.util.Log;
-import com.google.android.gms.maps.model.LatLng;
+
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.MqttClient;
+
 import java.util.concurrent.CompletableFuture;
 
 public class MqttService {
     private Mqtt3AsyncClient client;
-    private String serverHost = "192.168.56.1";
+    private String serverHost = "localhost";
     private int serverPort = 1883;
+    private boolean isConnecting = false;
 
-    public void createMQTTclient() {
+    // Initialize the MQTT client
+    public void createMQTTClient(String clientId) {
         client = MqttClient.builder()
                 .useMqttVersion3()
-                .identifier("asteroid-observation-client")
+                .identifier(clientId)
                 .serverHost(serverHost)
                 .serverPort(serverPort)
-                .automaticReconnectWithDefaultConfig() // Reconnect if connection is lost
+                .automaticReconnectWithDefaultConfig()
                 .buildAsync();
     }
 
+    // Connect to the MQTT broker and set up a subscription callback
     public CompletableFuture<Boolean> connectToBroker(String topic, MessageCallback callback) {
-        return client.connectWith().send().thenApply(connAck -> {
-            subscribeToTopic(topic, callback); // Subscribe to the topic after connection
+        if (isConnecting || (client != null && client.getState().isConnected())) {
+            Log.d("MqttService", "Client is already connected or connecting. Skipping connect attempt.");
+            return CompletableFuture.completedFuture(true);
+        }
+
+        isConnecting = true;
+
+        return client.connectWith().cleanSession(false).send().thenApply(connAck -> {
+            isConnecting = false;
+
+            // Subscribe to the specified topic
+            subscribeToTopic(topic, callback);
+
+            // Publish a message to indicate successful connection
+            String successMessage = "Client connected successfully to broker!";
+            publishMessage(topic, successMessage);
+            Log.d("MqttService", "Connection message sent to topic: " + topic);
+
             return true;
         }).exceptionally(ex -> {
-            Log.e("MqttService", "Failed to connect to broker, retrying...", ex);
-            retryConnection(topic, callback);  // Retry the connection
+            isConnecting = false;
+            Log.e("MqttService", "Failed to connect to broker", ex);
             return false;
         });
     }
 
-    private void retryConnection(String topic, MessageCallback callback) {
-        // Wait briefly before retrying
-        new android.os.Handler().postDelayed(() -> connectToBroker(topic, callback), 5000);  // Retry after 5 seconds
-    }
 
+    // Subscribe to a specific topic
     public void subscribeToTopic(String topic, MessageCallback callback) {
+        if (client == null || !client.getState().isConnected()) {
+            Log.w("MqttService", "Cannot subscribe. Client is not connected.");
+            return;
+        }
+
         client.subscribeWith()
                 .topicFilter(topic)
                 .callback(publish -> {
@@ -54,7 +76,13 @@ public class MqttService {
                 });
     }
 
+    // Unsubscribe from a specific topic
     public void unsubscribeFromTopic(String topic) {
+        if (client == null || !client.getState().isConnected()) {
+            Log.w("MqttService", "Cannot unsubscribe. Client is not connected.");
+            return;
+        }
+
         client.unsubscribeWith()
                 .topicFilter(topic)
                 .send()
@@ -67,18 +95,39 @@ public class MqttService {
                 });
     }
 
-    public void publishObservation(LatLng location, String description) {
-        String topic = "AsteroidObservation";
-        String message = location.latitude + "," + location.longitude + "," + description;
-        client.publishWith().topic(topic).payload(message.getBytes()).send()
+    // Publish a message to a topic
+    public void publishMessage(String topic, String message) {
+        if (client == null || !client.getState().isConnected()) {
+            Log.w("MqttService", "Cannot publish. Client is not connected.");
+            return;
+        }
+
+        client.publishWith().topic(topic).payload(message.getBytes()).retain(true).send()
                 .whenComplete((publish, throwable) -> {
                     if (throwable != null) {
-                        Log.e("MqttService", "Failed to publish observation", throwable);
+                        Log.e("MqttService", "Failed to publish message", throwable);
                     } else {
-                        Log.d("MqttService", "Published observation to topic: " + topic);
+                        Log.d("MqttService", "Published message to topic: " + topic);
                     }
                 });
     }
+
+    // Disconnect the MQTT client
+    public void disconnect() {
+        if (client != null) {
+            client.disconnect()
+                    .whenComplete((unused, throwable) -> {
+                        if (throwable != null) {
+                            Log.e("MqttService", "Failed to disconnect", throwable);
+                        } else {
+                            Log.d("MqttService", "Disconnected from broker");
+                        }
+                    });
+        } else {
+            Log.w("MqttService", "Client is null. Nothing to disconnect.");
+        }
+    }
+
 
     public interface MessageCallback {
         void onMessageReceived(String message);

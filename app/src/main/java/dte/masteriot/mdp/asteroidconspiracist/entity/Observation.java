@@ -2,6 +2,8 @@ package dte.masteriot.mdp.asteroidconspiracist.entity;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Objects;
+
 public class Observation {
     private LatLng location;
     private String description;
@@ -53,5 +55,20 @@ public class Observation {
         return "Description: " + description + "\n" +
                 "Time: " + timestamp + "\n" +
                 "Location: " + cityName;
+    }
+
+    // Equals method: Compare Observations based on location and description
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Observation that = (Observation) o;
+        return location.equals(that.location) && description.equals(that.description);
+    }
+
+    // HashCode method: Generate hash code based on location and description
+    @Override
+    public int hashCode() {
+        return Objects.hash(location, description);
     }
 }
