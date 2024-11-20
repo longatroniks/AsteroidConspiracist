@@ -7,10 +7,10 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -31,32 +31,50 @@ import dte.masteriot.mdp.asteroidconspiracist.activity.modal.ObservationModal;
 import dte.masteriot.mdp.asteroidconspiracist.entity.Observation;
 import dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.observation.ObservationPagerAdapter;
 import dte.masteriot.mdp.asteroidconspiracist.service.MqttService;
+import dte.masteriot.mdp.asteroidconspiracist.util.date.DateUtils;
 import dte.masteriot.mdp.asteroidconspiracist.util.file.FileUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class MapsActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
-    private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationClient;
-    private MqttService mqttService = new MqttService();
-    private Marker currentObservationMarker;
-    private List<Observation> observationLocations = new ArrayList<>();
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private boolean isConnectedToBroker = false;
-    private boolean subscribedToObservations = true;  // Default subscription to Observations
-    private boolean subscribedToShelters = false;
 
+    private static final String OBSERVATION_TOPIC = "AsteroidObservation";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private final MqttService mqttService = new MqttService();
     private ObservationPagerAdapter adapter;
+    private GoogleMap mMap;
     private GoogleMap fullScreenMap;
+    private MarkerPair currentObservationMarker;
     private ImageButton btnToggleFullScreen;
     private ImageButton btnExitFullScreen;
     private FrameLayout fullScreenMapOverlay;
+
     private boolean isFullScreen = false;
+    private boolean isConnectedToBroker = false;
+
+    private final List<Observation> observationLocations = new ArrayList<>();
+    private final Set<String> publishedObservationIds = new HashSet<>();
+    private final List<Observation> pendingObservations = new ArrayList<>();
+    private final Map<Observation, MarkerPair> observationMarkers = new HashMap<>();
+
+    public static class MarkerPair {
+        public Marker normalMarker;
+        public Marker fullScreenMarker;
+
+        public MarkerPair(Marker normalMarker, Marker fullScreenMarker) {
+            this.normalMarker = normalMarker;
+            this.fullScreenMarker = fullScreenMarker;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,23 +101,24 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         // Set up the map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
+            mapFragment.getMapAsync(googleMap -> {
+                mMap = googleMap;
+                setupMap(mMap);
+            });
         }
 
-        // Set up full-screen map (initialize once and reuse)
+        // Set up full-screen map
         SupportMapFragment fullScreenMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fullScreenMap);
         if (fullScreenMapFragment != null) {
             fullScreenMapFragment.getMapAsync(googleMap -> {
                 fullScreenMap = googleMap;
-                fullScreenMap.setOnMapClickListener(MapsActivity.this);  // Same behavior as regular map
+                setupMap(fullScreenMap);
             });
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mqttService.createMQTTclient();
+        mqttService.createMQTTClient("maps-activity-client");
         connectToBroker();
-
-        setupSubscriptionButtons();
     }
 
     private void enterFullScreenMode() {
@@ -107,10 +126,11 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         isFullScreen = true;
 
         if (mMap != null && fullScreenMap != null) {
+            // Sync camera position
             fullScreenMap.moveCamera(CameraUpdateFactory.newCameraPosition(mMap.getCameraPosition()));
-            syncMapMarkers();  // Sync markers when entering full screen
         }
     }
+
 
     private void exitFullScreenMode() {
         fullScreenMapOverlay.setVisibility(View.GONE);
@@ -131,92 +151,120 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
 
 
     private void connectToBroker() {
-        mqttService.connectToBroker("Observations", message -> handleNewObservation(message, "Observations"))
+        mqttService.connectToBroker(OBSERVATION_TOPIC, message -> handleNewObservation(message, OBSERVATION_TOPIC))
                 .thenAccept(isConnected -> {
                     isConnectedToBroker = isConnected;
                     if (isConnected) {
-                        Log.d("MQTT", "Connected to broker and subscribed to Observations topic");
+                        Log.d("MapsActivity", "Connected to broker and subscribed to topic");
                         publishSavedObservations();
-                        if (subscribedToObservations) {
-                            loadSavedObservations();
-                        }
+                        loadSavedObservations();
+
+                        // Subscribe to the status topic
+                        mqttService.subscribeToTopic("AsteroidObservation/Status", this::handleStatusMessage);
                     } else {
-                        Log.d("MQTT", "Failed to connect to broker");
+                        Log.d("MapsActivity", "Failed to connect to broker");
                     }
                 });
-        mqttService.connectToBroker("Shelters", message -> handleNewObservation(message, "Shelters"));
     }
 
-    private void setupSubscriptionButtons() {
-        Button btnToggleObservations = findViewById(R.id.btnToggleObservations);
-
-        btnToggleObservations.setOnClickListener(v -> {
-            subscribedToObservations = !subscribedToObservations;
-            toggleSubscription("Observations", subscribedToObservations);
+    private void handleStatusMessage(String message) {
+        runOnUiThread(() -> {
+            Log.d("MapsActivity", "Status message received: " + message);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         });
-    }
-
-    private void toggleSubscription(String topic, boolean subscribe) {
-        if (subscribe) {
-            mqttService.subscribeToTopic(topic, message -> handleNewObservation(message, topic));
-            Toast.makeText(this, "Subscribed to " + topic, Toast.LENGTH_SHORT).show();
-            if (topic.equals("Observations")) {
-                loadSavedObservations();
-            }
-        } else {
-            mqttService.unsubscribeFromTopic(topic);
-            clearMarkersForTopic(topic);
-            Toast.makeText(this, "Unsubscribed from " + topic, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    private void clearMarkersForTopic(String topic) {
-        if (mMap != null) {
-            mMap.clear();
-            if (subscribedToObservations) loadSavedObservations();
-        }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnMapClickListener(this);
-
         checkLocationPermission();
+
+        setupMap(mMap);
+
+        // Process pending observations
+        runOnUiThread(() -> {
+            for (Observation observation : pendingObservations) {
+                LatLng location = observation.getLocation();
+                String description = observation.getDescription();
+
+                mMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(description)
+                        .snippet("Time: " + observation.getTimestamp() + "\nLocation: " + observation.getCityName()));
+            }
+            pendingObservations.clear();
+
+            loadSavedObservations();
+        });
+    }
+
+    private void setupMap(GoogleMap map) {
+        map.setOnMapClickListener(this);
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(true);
 
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-                if (location != null) {
-                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-                    mMap.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
-                }
+                runOnUiThread(() -> {
+                    if (location != null) {
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+                        map.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
+                    }
+                });
             }).addOnFailureListener(e -> Log.e("LocationError", "Failed to get user's location", e));
-        }
-
-        if (subscribedToObservations) {
-            loadSavedObservations();
         }
     }
 
-
     @Override
     public void onMapClick(LatLng point) {
-        if (currentObservationMarker != null) currentObservationMarker.remove();
+        if (currentObservationMarker != null) {
+            if (currentObservationMarker.normalMarker != null) {
+                currentObservationMarker.normalMarker.remove();
+            }
+            if (currentObservationMarker.fullScreenMarker != null) {
+                currentObservationMarker.fullScreenMarker.remove();
+            }
+        }
 
-        currentObservationMarker = mMap.addMarker(new MarkerOptions()
-                .position(point)
-                .title("New Observation")
-                .snippet("Tap to confirm"));
+        Marker normalMarker = null;
+        Marker fullScreenMarker = null;
 
-        currentObservationMarker.showInfoWindow();
-        mMap.setOnInfoWindowClickListener(marker -> {
-            if (marker.equals(currentObservationMarker)) {
+        if (mMap != null) {
+            normalMarker = mMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title("New Observation")
+                    .snippet("Tap to confirm"));
+            normalMarker.showInfoWindow();
+        }
+
+        if (fullScreenMap != null) {
+            fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title("New Observation")
+                    .snippet("Tap to confirm"));
+            if (isFullScreen) {
+                fullScreenMarker.showInfoWindow();
+            }
+        }
+
+        currentObservationMarker = new MarkerPair(normalMarker, fullScreenMarker);
+
+        // Set info window click listener on both maps
+        GoogleMap.OnInfoWindowClickListener listener = marker -> {
+            if ((currentObservationMarker.normalMarker != null && marker.equals(currentObservationMarker.normalMarker)) ||
+                    (currentObservationMarker.fullScreenMarker != null && marker.equals(currentObservationMarker.fullScreenMarker))) {
                 openObservationModal(point);
             }
-        });
+        };
+
+        if (mMap != null) {
+            mMap.setOnInfoWindowClickListener(listener);
+        }
+
+        if (fullScreenMap != null) {
+            fullScreenMap.setOnInfoWindowClickListener(listener);
+        }
     }
 
     private void openObservationModal(LatLng location) {
@@ -228,18 +276,40 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     }
 
     private void saveObservation(LatLng location, String description) {
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        String timestamp = DateUtils.generateTimestamp();
         String cityName = getCityFromLocation(location);
 
-        Observation observation = new Observation(location, description, timestamp, cityName);
-        observationLocations.add(observation);
+        FileUtils.saveObservationToFile(this, location, description, timestamp, cityName);
 
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(location)
-                .title(description)
-                .snippet("Time: " + timestamp + "\nLocation: " + cityName));
+        // Add the new observation to the local list and refresh the UI
+        Observation newObservation = new Observation(location, description, timestamp, cityName);
+        observationLocations.add(newObservation);
 
-        saveToFile(observation);
+        runOnUiThread(() -> {
+            adapter.notifyDataSetChanged();
+
+            // Add markers to both maps
+            Marker normalMarker = null;
+            Marker fullScreenMarker = null;
+
+            if (mMap != null) {
+                normalMarker = mMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(description)
+                        .snippet("Time: " + timestamp + "\nLocation: " + cityName));
+            }
+
+            if (fullScreenMap != null) {
+                fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(description)
+                        .snippet("Time: " + timestamp + "\nLocation: " + cityName));
+            }
+
+            observationMarkers.put(newObservation, new MarkerPair(normalMarker, fullScreenMarker));
+
+            Log.d("MapsActivity", "Observation saved and markers added to both maps.");
+        });
     }
 
     private String getCityFromLocation(LatLng location) {
@@ -255,84 +325,144 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         return "Unknown Location";
     }
 
-    private void publishObservation(LatLng location, String description) {
-        if (isConnectedToBroker) {
-            mqttService.publishObservation(location, description);
-            Log.d("MQTT", "Published observation via MQTT: " + location.toString());
-        } else {
-            Log.d("MQTT", "Broker connection not established. Observation not published.");
+    public void publishObservation(LatLng location, String description) {
+        String observationId = generateObservationId(location, description);
+
+        if (publishedObservationIds.contains(observationId)) {
+            Log.d("MapsActivity", "Observation already published. Skipping: " + observationId);
+            return;
         }
+
+        String topic = OBSERVATION_TOPIC;
+        String message = location.latitude + "," + location.longitude + "," + description;
+
+        mqttService.publishMessage(topic, message);
+        publishedObservationIds.add(observationId);
+        Log.d("MapsActivity", "Published observation: " + observationId);
+    }
+
+    private String generateObservationId(LatLng location, String description) {
+        return location.latitude + "," + location.longitude + "," + description;
     }
 
     private void publishSavedObservations() {
         List<Observation> savedObservations = FileUtils.loadObservationsFromFile(this);
+
         if (savedObservations != null) {
             for (Observation observation : savedObservations) {
-                mqttService.publishObservation(observation.getLocation(), observation.getDescription());
-                Log.d("MQTT", "Published saved observation via MQTT: " + observation.getLocation().toString());
-            }
-        }
-    }
+                String observationId = generateObservationId(observation.getLocation(), observation.getDescription());
 
-    private void saveToFile(Observation observation) {
-        try {
-            FileUtils.saveObservationToFile(this, observation.getLocation(), observation.getDescription(),
-                    observation.getTimestamp(), observation.getCityName());
-            Log.d("FileUtils", "Observation saved to file");
-        } catch (Exception e) {
-            Log.e("FileUtils", "Error saving observation to file", e);
+                if (!publishedObservationIds.contains(observationId)) {
+                    String topic = OBSERVATION_TOPIC;
+                    String message = observation.getLocation().latitude + "," +
+                            observation.getLocation().longitude + "," +
+                            observation.getDescription();
+
+                    mqttService.publishMessage(topic, message);
+                    publishedObservationIds.add(observationId);
+
+                    Log.d("MapsActivity", "Published saved observation: " + observationId);
+                } else {
+                    Log.d("MapsActivity", "Skipping already published observation: " + observationId);
+                }
+            }
+        } else {
+            Log.d("MapsActivity", "No saved observations to publish.");
         }
     }
 
     private void loadSavedObservations() {
-        if (mMap == null) {
-            Log.w("MapsActivity", "Map is not ready. Skipping loading observations.");
+        if (mMap == null || fullScreenMap == null) {
+            Log.w("MapsActivity", "Maps are not ready. Skipping loading observations.");
             return;
         }
 
         List<Observation> savedObservations = FileUtils.loadObservationsFromFile(this);
-        observationLocations.addAll(savedObservations);
 
-        // Update adapter data after loading observations
-        adapter.notifyDataSetChanged();
+        runOnUiThread(() -> {
+            for (Observation obs : savedObservations) {
+                if (!observationLocations.contains(obs)) {
+                    observationLocations.add(obs);
 
-        // Add markers to the small map and sync them with the full-screen map
-        for (Observation obs : savedObservations) {
-            LatLng location = obs.getLocation();
-            String description = obs.getDescription();
-            String timestamp = obs.getTimestamp();
-            String cityName = obs.getCityName();
+                    LatLng location = obs.getLocation();
+                    String description = obs.getDescription();
+                    String timestamp = obs.getTimestamp();
+                    String cityName = obs.getCityName();
 
-            mMap.addMarker(new MarkerOptions()
-                    .position(location)
-                    .title(description)
-                    .snippet("Time: " + timestamp + "\nLocation: " + cityName));
-        }
+                    Marker normalMarker = mMap.addMarker(new MarkerOptions()
+                            .position(location)
+                            .title(description)
+                            .snippet("Time: " + timestamp + "\nLocation: " + cityName));
 
-        syncMapMarkers();  // Ensure both maps display the same markers
+                    Marker fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                            .position(location)
+                            .title(description)
+                            .snippet("Time: " + timestamp + "\nLocation: " + cityName));
+
+                    observationMarkers.put(obs, new MarkerPair(normalMarker, fullScreenMarker));
+
+                    Log.d("MapsActivity", "Marker added for saved observation: " + description);
+                }
+            }
+
+            adapter.notifyDataSetChanged();
+        });
     }
 
     private void handleNewObservation(String message, String topic) {
-        if ((topic.equals("Observations") && subscribedToObservations) ||
-                (topic.equals("Shelters") && subscribedToShelters)) {
-            LatLng location = parseLocationFromMessage(message);
-            if (location != null) {
-                mMap.addMarker(new MarkerOptions().position(location).title(topic + " Observation"));
-                Log.d("MQTT", "New " + topic + " observation received from MQTT: " + location.toString());
+        runOnUiThread(() -> {
+            if (!topic.equals(OBSERVATION_TOPIC)) {
+                Log.w("MapsActivity", "Received message for unexpected topic: " + topic);
+                return;
             }
-        }
-    }
 
-    private LatLng parseLocationFromMessage(String message) {
-        try {
             String[] parts = message.split(",");
-            double lat = Double.parseDouble(parts[0]);
-            double lng = Double.parseDouble(parts[1]);
-            return new LatLng(lat, lng);
-        } catch (Exception e) {
-            Log.e("MQTT", "Error parsing MQTT message", e);
-            return null;
-        }
+            if (parts.length < 3) {
+                Log.d("MapsActivity", "Non-observation message received: " + message);
+                return; // Ignore non-observation messages
+            }
+
+            try {
+                double latitude = Double.parseDouble(parts[0]);
+                double longitude = Double.parseDouble(parts[1]);
+                String description = parts[2];
+
+                LatLng location = new LatLng(latitude, longitude);
+                Observation observation = new Observation(location, description, DateUtils.generateTimestamp(), getCityFromLocation(location));
+
+                if (!observationLocations.contains(observation)) {
+                    observationLocations.add(observation);
+                    adapter.notifyDataSetChanged();
+
+                    // Add markers to both maps
+                    Marker normalMarker = null;
+                    Marker fullScreenMarker = null;
+
+                    if (mMap != null) {
+                        normalMarker = mMap.addMarker(new MarkerOptions()
+                                .position(location)
+                                .title(description)
+                                .snippet("Time: " + observation.getTimestamp() + "\nLocation: " + observation.getCityName()));
+                    }
+
+                    if (fullScreenMap != null) {
+                        fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                                .position(location)
+                                .title(description)
+                                .snippet("Time: " + observation.getTimestamp() + "\nLocation: " + observation.getCityName()));
+                    }
+
+                    observationMarkers.put(observation, new MarkerPair(normalMarker, fullScreenMarker));
+
+                    Log.d("MapsActivity", "Added observation from MQTT: " + observation);
+
+                } else {
+                    Log.d("MapsActivity", "Duplicate observation received. Skipping: " + observation);
+                }
+            } catch (NumberFormatException e) {
+                Log.e("MapsActivity", "Error parsing observation message: " + message, e);
+            }
+        });
     }
 
     private void checkLocationPermission() {
@@ -340,29 +470,14 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         } else {
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-                if (location != null) {
-                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-                    mMap.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
-                }
+                runOnUiThread(() -> {
+                    if (location != null) {
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+                        mMap.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
+                    }
+                });
             });
-        }
-    }
-
-    private void syncMapMarkers() {
-        if (fullScreenMap != null) {
-            fullScreenMap.clear();  // Clear existing markers in full-screen map
-            for (Observation obs : observationLocations) {
-                LatLng location = obs.getLocation();
-                String description = obs.getDescription();
-                String timestamp = obs.getTimestamp();
-                String cityName = obs.getCityName();
-
-                fullScreenMap.addMarker(new MarkerOptions()
-                        .position(location)
-                        .title(description)
-                        .snippet("Time: " + timestamp + "\nLocation: " + cityName));
-            }
         }
     }
 
@@ -378,4 +493,11 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mqttService.disconnect();
+    }
+
 }

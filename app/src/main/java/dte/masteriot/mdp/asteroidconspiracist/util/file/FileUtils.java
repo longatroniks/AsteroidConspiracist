@@ -21,8 +21,18 @@ public class FileUtils {
     public static void saveObservationToFile(Context context, LatLng location, String description, String timestamp, String cityName) {
         try {
             List<Observation> observations = loadObservationsFromFile(context);
-            observations.add(new Observation(location, description, timestamp, cityName));
 
+            // Check for duplicates using Observation's equals method
+            Observation newObservation = new Observation(location, description, timestamp, cityName);
+            if (observations.contains(newObservation)) {
+                Log.d("FileUtils", "Duplicate observation detected. Skipping save.");
+                return;
+            }
+
+            // Add the new observation
+            observations.add(newObservation);
+
+            // Save updated list back to file
             JSONArray jsonArray = new JSONArray();
             for (Observation obs : observations) {
                 JSONObject jsonObject = new JSONObject();
