@@ -1,125 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="?attr/android:windowBackground"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activity.CompassActivity">
+    android:fillViewport="true">
 
-    <!-- Compass Section inside MaterialCardView -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/compassCard"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        app:cardBackgroundColor="?attr/colorSurface"
-        app:cardElevation="8dp"
-        app:cardCornerRadius="16dp"
-        app:strokeColor="?attr/colorPrimary"
-        app:strokeWidth="2dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/infoCard"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth_percent="0.45">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/android:windowBackground"
+        tools:context=".activity.CompassActivity">
 
-        <FrameLayout
-            android:layout_width="match_parent"
+        <!-- Compass Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/compassCard"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:padding="16dp">
+            android:layout_margin="16dp"
+            app:cardElevation="8dp"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="?attr/colorPrimary"
+            app:strokeWidth="2dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/instructionContainer"
+            app:layout_constraintWidth_percent="0.5">
 
-            <!-- Compass Image -->
-            <ImageView
-                android:id="@+id/compass_image"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/compass"
-                android:contentDescription="Compass"
-                android:rotation="0"
-                android:scaleType="centerInside"
-                app:tint="?attr/colorSecondary" />
+                android:layout_height="match_parent">
 
-            <!-- Direction Indicator -->
-            <TextView
-                android:id="@+id/direction_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="N"
-                android:textSize="48sp"
-                android:textColor="?attr/colorPrimary"
-                android:textStyle="bold"
-                android:fontFamily="monospace" />
-        </FrameLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <!-- North Arrow Image -->
+                <ImageView
+                    android:id="@+id/north_arrow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/compass"
+                    android:contentDescription="North Arrow"
+                    android:scaleType="centerInside" />
 
-    <!-- Info Section inside MaterialCardView -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/infoCard"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        app:cardBackgroundColor="?attr/colorSurface"
-        app:cardElevation="8dp"
-        app:cardCornerRadius="16dp"
-        app:strokeColor="?attr/colorPrimaryVariant"
-        app:strokeWidth="2dp"
-        app:layout_constraintStart_toEndOf="@id/compassCard"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth_percent="0.45">
+                <!-- Shelter Arrow Image -->
+                <ImageView
+                    android:id="@+id/shelter_arrow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/shelter_arrow"
+                    android:contentDescription="Shelter Arrow"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
 
+        <!-- Instruction Container -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/instructionContainer"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:gravity="center">
+            android:layout_margin="16dp"
+            app:layout_constraintStart_toEndOf="@id/compassCard"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <!-- Direction Label -->
             <TextView
-                android:id="@+id/info_text"
+                android:id="@+id/direction_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Align the needle to the target"
+                android:text="Direction: N"
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="18sp"
-                android:textStyle="italic" />
+                android:textSize="20sp"
+                android:textAlignment="center"
+                android:layout_marginBottom="8dp" />
 
+            <!-- Instruction Label -->
             <TextView
-                android:id="@+id/distance_text"
+                android:id="@+id/instruction_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:padding="8dp"
-                android:text="Distance: Calculating..."
+                android:text="Turn around until the red arrow points up."
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Shelter Info Text -->
+            <TextView
+                android:id="@+id/shelter_info_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nearest Shelter: N/A"
                 android:textColor="?attr/colorPrimary"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/closest_city_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:padding="8dp"
-                android:text="City: N/A"
-                android:textColor="?attr/colorSecondary"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/closest_shelter_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:padding="8dp"
-                android:text="Shelter: N/A"
-                android:textColor="?attr/colorTertiary"
-                android:textSize="18sp" />
+                android:textSize="16sp"
+                android:textAlignment="center" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

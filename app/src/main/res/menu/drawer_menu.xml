@@ -32,18 +32,9 @@
         android:icon="@drawable/ic_mqtt"
         android:titleTextColor="?attr/colorOnSurface"/>
 
-    <!-- High Contrast Mode Toggle -->
     <item
-        android:id="@+id/nav_high_contrast"
-        android:title="High Contrast Mode"
-        android:titleTextColor="?attr/colorOnSurface">
-
-        <menu>
-            <item
-                android:id="@+id/switch_high_contrast"
-                android:title="Enable High Contrast"
-                app:actionViewClass="android.widget.Switch"
-                android:titleTextColor="?attr/colorOnSurface"/>
-        </menu>
-    </item>
+        android:id="@+id/switch_high_contrast"
+        android:title="Enable High Contrast"
+        app:actionViewClass="android.widget.Switch"
+        android:titleTextColor="?attr/colorOnSurface"/>
 </menu>

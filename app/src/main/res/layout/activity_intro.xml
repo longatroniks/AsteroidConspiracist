@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/android:windowBackground"
+        android:background="?attr/colorOnSecondaryContainer"
         android:orientation="vertical" />
 
     <ImageView
@@ -34,7 +34,7 @@
         android:layout_marginLeft="25dp"
         android:layout_marginBottom="50dp"
         android:text="Asteroid\nConspiracist\n>"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
         android:lineHeight="50dp"

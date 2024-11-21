@@ -4,165 +4,145 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.View;
+import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Switch;
-import androidx.appcompat.widget.Toolbar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.navigation.NavigationView;
 import dte.masteriot.mdp.asteroidconspiracist.R;
-import dte.masteriot.mdp.asteroidconspiracist.viewmodel.BaseViewModel;
 
 public class BaseActivity extends AppCompatActivity {
-    protected DrawerLayout drawerLayout;
-    protected NavigationView navigationView;
-    protected Toolbar toolbar;
-    private BaseViewModel baseViewModel;
 
     private static final String PREF_HIGH_CONTRAST_MODE = "high_contrast_mode";
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        applyThemeBasedOnSettings();
-
+        applyThemeBasedOnSettings(); // Apply theme before activity is created
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
 
-        baseViewModel = new ViewModelProvider(this).get(BaseViewModel.class);
+        setupToolbar();
+        setupDrawer();
+        setupHighContrastSwitch();
+    }
 
-        toolbar = findViewById(R.id.toolbar);
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Set activity title in the toolbar
+        String activityTitle = getActivityTitle();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(activityTitle);
+        }
+    }
+
+    private void setupDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close);
+        // Create the toggle (hamburger icon)
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        toggle.syncState(); // Synchronize the drawer toggle state
 
-        setupNavigationMenu();
-        setupHighContrastSwitch();
-        setActivityTitle();
-
-        observeViewModel();
-    }
-
-    private void observeViewModel() {
-        baseViewModel.getHighContrastMode().observe(this, isEnabled -> {
-            // React to high contrast mode changes if needed
-            applyThemeBasedOnSettings();
-            recreate(); // Restart activity to apply the new theme
-        });
-    }
-
-    private void setActivityTitle() {
-        String className = this.getClass().getSimpleName();
-        String title;
-
-        switch (className) {
-            case "HomeActivity":
-                title = "Home";
-                break;
-            case "CompassActivity":
-                title = "Compass";
-                break;
-            case "ListActivity":
-                title = "Asteroid List";
-                break;
-            case "MapsActivity":
-                title = "Maps";
-                break;
-            case "AddShelterActivity":
-                title = "Add Shelter";
-                break;
-            default:
-                title = className.replace("Activity", ""); // Fallback for unexpected class names
-        }
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(title);
-        }
-    }
-
-    private void setupNavigationMenu() {
+        // Set navigation menu item click handling
         navigationView.setNavigationItemSelectedListener(item -> {
-            Intent intent = null;
-            if (item.getItemId() == R.id.nav_home) {
-                intent = new Intent(this, HomeActivity.class);
-            } else if (item.getItemId() == R.id.nav_compass) {
-                intent = new Intent(this, CompassActivity.class);
-            } else if (item.getItemId() == R.id.nav_asteroid_list) {
-                intent = new Intent(this, ListActivity.class);
-            } else if (item.getItemId() == R.id.nav_mqtt) {
-                intent = new Intent(this, MapsActivity.class);
-            } else if (item.getItemId() == R.id.nav_add_shelter) {
-                intent = new Intent(this, AddShelterActivity.class);
-            }
-
-            if (intent != null) {
-                startActivity(intent);
-                finish();
-            }
-
+            handleNavigationItemClick(item);
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
     }
 
     private void setupHighContrastSwitch() {
-        // Find the high contrast switch and set its initial state
-        Switch highContrastSwitch = (Switch) navigationView.getMenu().findItem(R.id.switch_high_contrast).getActionView();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean highContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
-        highContrastSwitch.setChecked(highContrastEnabled);
+        // Find the switch in the navigation menu
+        Switch highContrastSwitch = (Switch) navigationView.getMenu()
+                .findItem(R.id.switch_high_contrast)
+                .getActionView();
 
-        // Set listener to toggle high contrast mode
+        // Load the current preference state
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isHighContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
+        highContrastSwitch.setChecked(isHighContrastEnabled);
+
+        // Listen for switch toggle events
         highContrastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d("BaseActivity", "High contrast mode toggled: " + isChecked);
             prefs.edit().putBoolean(PREF_HIGH_CONTRAST_MODE, isChecked).apply();
-            baseViewModel.setHighContrastMode(isChecked);
+
+            // Restart activity to apply the new theme
+            restartActivity();
         });
     }
 
     private void applyThemeBasedOnSettings() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean highContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
-        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isHighContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
 
-        if (highContrastEnabled) {
-            if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
-                setTheme(R.style.Theme_AsteroidConspiracist_HighContrast_Dark);
-            } else {
-                setTheme(R.style.Theme_AsteroidConspiracist_HighContrast_Light);
-            }
-        } else {
-            if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
-                setTheme(R.style.Theme_AsteroidConspiracist_Dark);
-            } else {
-                setTheme(R.style.Theme_AsteroidConspiracist_Light);
-            }
+        int themeResId = isHighContrastEnabled
+                ? R.style.Theme_AsteroidConspiracist_HighContrast_Light
+                : R.style.Theme_AsteroidConspiracist_Light;
+
+        setTheme(themeResId);
+    }
+
+    private void handleNavigationItemClick(@NonNull MenuItem item) {
+        Intent intent = null;
+
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.nav_home) {
+            intent = new Intent(BaseActivity.this, HomeActivity.class);
+        } else if (itemId == R.id.nav_compass) {
+            intent = new Intent(BaseActivity.this, CompassActivity.class);
+        } else if (itemId == R.id.nav_asteroid_list) {
+            intent = new Intent(BaseActivity.this, ListActivity.class);
+        } else if (itemId == R.id.nav_mqtt) {
+            intent = new Intent(BaseActivity.this, MapsActivity.class);
+        } else if (itemId == R.id.nav_add_shelter) {
+            intent = new Intent(BaseActivity.this, AddShelterActivity.class);
+        }
+
+        if (intent != null) {
+            startActivity(intent);
+            finish();
         }
     }
 
-    protected void enableBackButton(boolean enableBack) {
-        if (getSupportActionBar() != null) {
-            if (enableBack) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
-            } else {
-                ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                        this, drawerLayout, toolbar,
-                        R.string.navigation_drawer_open,
-                        R.string.navigation_drawer_close);
-                drawerLayout.addDrawerListener(toggle);
-                toggle.syncState();
-            }
+    private String getActivityTitle() {
+        // Dynamically set the title based on the activity class name
+        String className = getClass().getSimpleName();
+        switch (className) {
+            case "HomeActivity":
+                return "Home";
+            case "CompassActivity":
+                return "Compass";
+            case "ListActivity":
+                return "Asteroid List";
+            case "MapsActivity":
+                return "Maps";
+            case "AddShelterActivity":
+                return "Add Shelter";
+            default:
+                return "AsteroidConspiracist"; // Default app title
         }
+    }
+
+    private void restartActivity() {
+        // Explicitly restart the current activity
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     @Override
@@ -172,11 +152,5 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
     }
 }

@@ -1,71 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black" format="color">#FF000000</color>
+    <color name="white" format="color">#FFFFFFFF</color>
 
     <!-- Base colors -->
-    <color name="dark_background">#1D1C16</color>
-    <color name="light_background">#FFFFFF</color>
+    <color name="dark_background" format="color">#1D1C16</color>
+    <color name="light_background" format="color">#FFFFFF</color>
 
     <!-- Primary colors (Brownish tones) -->
-    <color name="primary_dark">#4D4839</color>
-    <color name="primary_light">#8F6A33</color>
-    <color name="primary_variant">#51390C</color>
+    <color name="primary_dark" format="color">#4D4839</color>
+    <color name="primary_light" format="color">#8F6A33</color>
+    <color name="primary_variant" format="color">#51390C</color>
 
     <!-- Additional Greenish and yellowish Tones -->
-    <color name="earth_green_light">#A3B18A</color>
-    <color name="earth_green_dark">#6B8E23</color>
-    <color name="earth_yellow_light">#D9B44A</color>
-    <color name="earth_yellow_dark">#B38A58</color>
-    <color name="earth_muted">#B7A57A</color>
-
-    <array name="earth_tones">
-        <item>@color/primary_light</item>
-        <item>@color/earth_green_light</item>
-        <item>@color/earth_green_dark</item>
-        <item>@color/earth_yellow_light</item>
-        <item>@color/earth_yellow_dark</item>
-        <item>@color/earth_muted</item>
-    </array>
+    <color name="earth_green_light" format="color">#A3B18A</color>
+    <color name="earth_green_dark" format="color">#6B8E23</color>
+    <color name="earth_yellow_light" format="color">#D9B44A</color>
+    <color name="earth_yellow_dark" format="color">#B38A58</color>
+    <color name="earth_muted" format="color">#B7A57A</color>
 
     <!-- Accent color -->
-    <color name="accent_blue">#08FBFF</color>
-    <color name="accent_blue_dark">#06C9CC</color>
-    <color name="accent_blue_light">#7CFDFF</color>
+    <color name="accent_blue" format="color">#08FBFF</color>
+    <color name="accent_blue_dark" format="color">#06C9CC</color>
+    <color name="accent_blue_light" format="color">#7CFDFF</color>
 
     <!-- Text colors -->
-    <color name="text_primary_dark">#FFFFFF</color>
-    <color name="text_secondary_dark">#E0E0E0</color>
-    <color name="text_disabled_dark">#9E9E9E</color>
+    <color name="text_primary_dark" format="color">#FFFFFF</color>
+    <color name="text_secondary_dark" format="color">#E0E0E0</color>
+    <color name="text_disabled_dark" format="color">#9E9E9E</color>
 
-    <color name="text_primary_light">#1D1C16</color>
-    <color name="text_secondary_light">#4D4839</color>
-    <color name="text_disabled_light">#8F6A33</color>
+    <color name="text_primary_light" format="color">#1D1C16</color>
+    <color name="text_secondary_light" format="color">#4D4839</color>
+    <color name="text_disabled_light" format="color">#8F6A33</color>
 
     <!-- Surface colors -->
-    <color name="surface_dark">#2D2C26</color>
-    <color name="surface_light">#F5F5F5</color>
+    <color name="surface_dark" format="color">#2D2C26</color>
+    <color name="surface_light" format="color">#F5F5F5</color>
 
     <!-- Card colors -->
-    <color name="card_dark">#3D3C36</color>
-    <color name="card_light">#FFFFFF</color>
+    <color name="card_dark" format="color">#3D3C36</color>
+    <color name="card_light" format="color">#FFFFFF</color>
 
     <!-- Ripple colors -->
-    <color name="ripple_dark">#4008FBFF</color>
-    <color name="ripple_light">#408F6A33</color>
+    <color name="ripple_dark" format="color">#4008FBFF</color>
+    <color name="ripple_light" format="color">#408F6A33</color>
 
     <!-- Status bar colors -->
-    <color name="status_bar_dark">#121210</color>
-    <color name="status_bar_light">#4D4839</color>
+    <color name="status_bar_dark" format="color">#121210</color>
+    <color name="status_bar_light" format="color">#4D4839</color>
 
     <!-- Overlay colors -->
-    <color name="scrim_dark">#52000000</color>
-    <color name="scrim_light">#26000000</color>
+    <color name="scrim_dark" format="color">#52000000</color>
+    <color name="scrim_light" format="color">#26000000</color>
 
-    <color name="yellow">#FFFF00</color>
+    <color name="yellow" format="color">#FFFF00</color>
 
     <!-- Color on Primary/Surface for accessibility -->
-    <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorOnSurface">#1D1C16</color>
-    <color name="colorOnSurfaceVariant">#8A8A8A</color>
-    <color name="barChartLabelColor">#8A8A8A</color>
+    <color name="colorOnPrimary" format="color">#FFFFFF</color>
+    <color name="colorOnSurface" format="color">#1D1C16</color>
+    <color name="colorOnSurfaceVariant" format="color">#8A8A8A</color>
+    <color name="barChartLabelColor" format="color">#8A8A8A</color>
+    <color name="tertiary_light" format="color">#FFD700</color> <!-- Gold for subtle accents -->
+    <color name="highlight_red" format="color">#FF4500</color> <!-- High-contrast red -->
+    <color name="highlight_green" format="color">#32CD32</color> <!-- High-contrast green -->
+    <color name="highlight_pink" format="color">#FF6FFF</color> <!-- High-contrast green -->
+    <color name="highlight_orange" format="color">#F88F33</color> <!-- High-contrast green -->
+
 </resources>
