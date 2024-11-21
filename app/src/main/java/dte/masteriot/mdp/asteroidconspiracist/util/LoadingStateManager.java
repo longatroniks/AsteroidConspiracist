@@ -10,6 +10,7 @@ public class LoadingStateManager {
     private final TextView loadingMessage;
     private final ProgressBar loadingSpinner;
     private final View[] chartViews;
+    private boolean isLoadingVisible = true; // Track visibility state
 
     public LoadingStateManager(TextView loadingMessage, ProgressBar loadingSpinner, View... chartViews) {
         this.loadingMessage = loadingMessage;
@@ -18,6 +19,9 @@ public class LoadingStateManager {
     }
 
     public void showLoadingScreen() {
+        if (isLoadingVisible) return; // Avoid redundant calls
+        isLoadingVisible = true;
+        Log.d("LoadingStateManager", "Showing loading screen");
         loadingMessage.setVisibility(View.VISIBLE);
         loadingSpinner.setVisibility(View.VISIBLE);
         for (View view : chartViews) {
@@ -26,6 +30,8 @@ public class LoadingStateManager {
     }
 
     public void hideLoadingScreen() {
+        if (!isLoadingVisible) return; // Avoid redundant calls
+        isLoadingVisible = false;
         Log.d("LoadingStateManager", "Hiding loading screen");
         loadingMessage.setVisibility(View.GONE);
         loadingSpinner.setVisibility(View.GONE);
@@ -34,5 +40,4 @@ public class LoadingStateManager {
             view.setVisibility(View.VISIBLE);
         }
     }
-
 }

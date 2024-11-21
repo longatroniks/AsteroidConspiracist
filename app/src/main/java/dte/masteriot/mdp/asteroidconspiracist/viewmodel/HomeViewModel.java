@@ -1,6 +1,7 @@
 package dte.masteriot.mdp.asteroidconspiracist.viewmodel;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -15,7 +16,7 @@ import dte.masteriot.mdp.asteroidconspiracist.repo.AsteroidRepository;
 public class HomeViewModel extends ViewModel {
 
     private final MutableLiveData<List<Asteroid>> asteroidsLiveData = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<Boolean> isLoadingLiveData = new MutableLiveData<>(true);
+    private final MutableLiveData<Boolean> isLoadingLiveData = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>(null);
     private final MutableLiveData<String> dataSourceLiveData = new MutableLiveData<>();
 
@@ -39,27 +40,32 @@ public class HomeViewModel extends ViewModel {
         return dataSourceLiveData;
     }
 
-    public void setAsteroidsLiveData(List<Asteroid> asteroids) {
-        asteroidsLiveData.setValue(asteroids);
-    }
-
     public boolean isDataLoaded() {
         return isDataLoaded;
     }
 
     public void fetchAsteroids(Context context, boolean isNetworkAvailable) {
-        isLoadingLiveData.setValue(true); // Set loading state to true
+        if (isDataLoaded || Boolean.TRUE.equals(isLoadingLiveData.getValue())) return;
+
+        Log.d("HomeViewModel", "Starting asteroid data fetch...");
+        isLoadingLiveData.postValue(true); // Ensure loading state is active
+
         asteroidRepository.fetchAsteroids(context, isNetworkAvailable, new AsteroidRepository.FetchCallback() {
             @Override
             public void onSuccess() {
-                asteroidsLiveData.setValue(asteroidRepository.getAsteroidList());
-                isLoadingLiveData.setValue(false); // Set loading state to false
+                Log.d("HomeViewModel", "Asteroid data fetch successful.");
+                if (!isDataLoaded) {
+                    asteroidsLiveData.setValue(asteroidRepository.getAsteroidList());
+                    isDataLoaded = true;
+                }
+                isLoadingLiveData.postValue(false); // Loading is complete
             }
 
             @Override
             public void onFailure(String error) {
+                Log.d("HomeViewModel", "Asteroid data fetch failed: " + error);
                 errorMessageLiveData.setValue(error);
-                isLoadingLiveData.setValue(false); // Set loading state to false
+                isLoadingLiveData.postValue(false); // Ensure loading is hidden even on failure
             }
         });
     }

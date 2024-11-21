@@ -9,25 +9,29 @@ import android.widget.EditText;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 
-public class ObservationModal extends Dialog {
+public class ShelterModal extends Dialog {
+
     @SuppressLint("ResourceAsColor")
-    public ObservationModal(Context context, OnSaveListener listener) {
+    public ShelterModal(Context context, OnSaveListener listener) {
         super(context);
-        setContentView(R.layout.modal_observation);
+        setContentView(R.layout.modal_shelter);
 
         getWindow().setBackgroundDrawable(new ColorDrawable(android.R.color.transparent));
 
-        EditText descriptionInput = findViewById(R.id.descriptionInput);
+        EditText nameInput = findViewById(R.id.shelterNameInput);
+        EditText cityInput = findViewById(R.id.cityNameInput);
         Button saveButton = findViewById(R.id.saveButton);
 
         saveButton.setOnClickListener(view -> {
-            String description = descriptionInput.getText().toString();
-            listener.onSave(description);
+            String name = nameInput.getText().toString();
+            String city = cityInput.getText().toString();
+            listener.onSave(name, city);
             dismiss();
         });
     }
 
     public interface OnSaveListener {
-        void onSave(String description);
+        void onSave(String name, String city);
     }
+
 }

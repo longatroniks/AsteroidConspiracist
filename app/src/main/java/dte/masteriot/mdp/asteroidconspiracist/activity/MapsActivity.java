@@ -1,6 +1,7 @@
 package dte.masteriot.mdp.asteroidconspiracist.activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -22,14 +23,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import dte.masteriot.mdp.asteroidconspiracist.R;
 import dte.masteriot.mdp.asteroidconspiracist.activity.modal.ObservationModal;
+import dte.masteriot.mdp.asteroidconspiracist.activity.modal.ShelterModal;
 import dte.masteriot.mdp.asteroidconspiracist.entity.Observation;
 import dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.observation.ObservationPagerAdapter;
+import dte.masteriot.mdp.asteroidconspiracist.entity.Shelter;
 import dte.masteriot.mdp.asteroidconspiracist.service.MqttService;
 import dte.masteriot.mdp.asteroidconspiracist.util.date.DateUtils;
 import dte.masteriot.mdp.asteroidconspiracist.util.file.FileUtils;
@@ -41,11 +45,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class MapsActivity extends BaseActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
 
     private static final String OBSERVATION_TOPIC = "AsteroidObservation";
+    private static final String SHELTER_TOPIC = "AsteroidShelter";
+
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -62,9 +69,17 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     private boolean isConnectedToBroker = false;
 
     private final List<Observation> observationLocations = new ArrayList<>();
+    private final List<Shelter> shelterLocations = new ArrayList<>(); // List to hold shelters
+
     private final Set<String> publishedObservationIds = new HashSet<>();
+    private final Set<String> publishedShelterIds = new HashSet<>();
+
     private final List<Observation> pendingObservations = new ArrayList<>();
+    private final List<Shelter> pendingShelters = new ArrayList<>();
+
     private final Map<Observation, MarkerPair> observationMarkers = new HashMap<>();
+    private final Map<Shelter, MarkerPair> shelterMarkers = new HashMap<>();
+
 
     public static class MarkerPair {
         public Marker normalMarker;
@@ -152,26 +167,26 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
 
     private void connectToBroker() {
         mqttService.connectToBroker(OBSERVATION_TOPIC, message -> handleNewObservation(message, OBSERVATION_TOPIC))
-                .thenAccept(isConnected -> {
-                    isConnectedToBroker = isConnected;
+                .thenCompose(isConnected -> {
                     if (isConnected) {
-                        Log.d("MapsActivity", "Connected to broker and subscribed to topic");
+                        Log.d("MapsActivity", "Subscribed to observation topic.");
+                        return mqttService.connectToBroker(SHELTER_TOPIC, message -> handleNewShelter(message, SHELTER_TOPIC));
+                    } else {
+                        Log.d("MapsActivity", "Failed to connect to observation topic.");
+                        return CompletableFuture.completedFuture(false);
+                    }
+                })
+                .thenAccept(isConnected -> {
+                    if (isConnected) {
+                        Log.d("MapsActivity", "Connected to broker and subscribed to shelter topic.");
                         publishSavedObservations();
                         loadSavedObservations();
-
-                        // Subscribe to the status topic
-                        mqttService.subscribeToTopic("AsteroidObservation/Status", this::handleStatusMessage);
+                        publishSavedShelters();
+                        loadSavedShelters();
                     } else {
-                        Log.d("MapsActivity", "Failed to connect to broker");
+                        Log.d("MapsActivity", "Failed to connect to shelter topic.");
                     }
                 });
-    }
-
-    private void handleStatusMessage(String message) {
-        runOnUiThread(() -> {
-            Log.d("MapsActivity", "Status message received: " + message);
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        });
     }
 
     @Override
@@ -194,9 +209,25 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
             pendingObservations.clear();
 
+            // Process pending shelters
+            for (Shelter shelter : pendingShelters) {
+                LatLng location = shelter.getLocation();
+                String name = shelter.getName();
+
+                mMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(name)
+                        .snippet("City: " + shelter.getCity())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+            }
+            pendingShelters.clear();
+
+            // Load saved observations and shelters
             loadSavedObservations();
+            loadSavedShelters();
         });
     }
+
 
     private void setupMap(GoogleMap map) {
         map.setOnMapClickListener(this);
@@ -227,44 +258,54 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
         }
 
-        Marker normalMarker = null;
-        Marker fullScreenMarker = null;
+        Marker normalMarker;
+        Marker fullScreenMarker;
 
         if (mMap != null) {
             normalMarker = mMap.addMarker(new MarkerOptions()
                     .position(point)
-                    .title("New Observation")
-                    .snippet("Tap to confirm"));
+                    .title("Choose Action")
+                    .snippet("Tap to add Observation or Shelter"));
             normalMarker.showInfoWindow();
+
+            mMap.setOnInfoWindowClickListener(marker -> {
+                if (marker.equals(normalMarker)) {
+                    showActionDialog(point);
+                }
+            });
+        } else {
+            normalMarker = null;
         }
 
         if (fullScreenMap != null) {
             fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
                     .position(point)
-                    .title("New Observation")
-                    .snippet("Tap to confirm"));
+                    .title("Choose Action")
+                    .snippet("Tap to add Observation or Shelter"));
             if (isFullScreen) {
                 fullScreenMarker.showInfoWindow();
             }
+
+            fullScreenMap.setOnInfoWindowClickListener(marker -> {
+                if (marker.equals(fullScreenMarker)) {
+                    showActionDialog(point);
+                }
+            });
+        } else {
+            fullScreenMarker = null;
         }
 
         currentObservationMarker = new MarkerPair(normalMarker, fullScreenMarker);
+    }
 
-        // Set info window click listener on both maps
-        GoogleMap.OnInfoWindowClickListener listener = marker -> {
-            if ((currentObservationMarker.normalMarker != null && marker.equals(currentObservationMarker.normalMarker)) ||
-                    (currentObservationMarker.fullScreenMarker != null && marker.equals(currentObservationMarker.fullScreenMarker))) {
-                openObservationModal(point);
-            }
-        };
-
-        if (mMap != null) {
-            mMap.setOnInfoWindowClickListener(listener);
-        }
-
-        if (fullScreenMap != null) {
-            fullScreenMap.setOnInfoWindowClickListener(listener);
-        }
+    private void showActionDialog(LatLng location) {
+        new AlertDialog.Builder(this)
+                .setTitle("Add New Entry")
+                .setMessage("Do you want to add an Observation or a Shelter?")
+                .setPositiveButton("Observation", (dialog, which) -> openObservationModal(location))
+                .setNegativeButton("Shelter", (dialog, which) -> openShelterModal(location))
+                .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void openObservationModal(LatLng location) {
@@ -275,13 +316,20 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         modal.show();
     }
 
+    private void openShelterModal(LatLng location) {
+        ShelterModal modal = new ShelterModal(this, (name, city) -> {
+            saveShelter(location, name, city);
+            publishShelter(location, name);
+        });
+        modal.show();
+    }
+
     private void saveObservation(LatLng location, String description) {
         String timestamp = DateUtils.generateTimestamp();
         String cityName = getCityFromLocation(location);
 
         FileUtils.saveObservationToFile(this, location, description, timestamp, cityName);
 
-        // Add the new observation to the local list and refresh the UI
         Observation newObservation = new Observation(location, description, timestamp, cityName);
         observationLocations.add(newObservation);
 
@@ -307,8 +355,62 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
 
             observationMarkers.put(newObservation, new MarkerPair(normalMarker, fullScreenMarker));
+            Log.d("MapsActivity", "Observation saved and displayed: " + newObservation);
+        });
+    }
 
-            Log.d("MapsActivity", "Observation saved and markers added to both maps.");
+    private void saveShelter(LatLng location, String name, String city) {
+        Shelter newShelter = new Shelter(name, city, location);
+        shelterLocations.add(newShelter);
+        FileUtils.saveShelterToFile(this, location, name, city); // Save to file
+
+        runOnUiThread(() -> {
+            if (mMap != null) {
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(newShelter.getLocation())
+                        .title(newShelter.getName())
+                        .snippet("City: " + newShelter.getCity())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+
+                Marker fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                        .position(newShelter.getLocation())
+                        .title(newShelter.getName())
+                        .snippet("City: " + newShelter.getCity())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                shelterMarkers.put(newShelter, new MarkerPair(marker, fullScreenMarker));
+            }
+            Log.d("MapsActivity", "Shelter saved and displayed: " + newShelter);
+        });
+    }
+
+    private void loadSavedShelters() {
+        List<Shelter> savedShelters = FileUtils.loadSheltersFromFile(this); // Load from file
+        runOnUiThread(() -> {
+            for (Shelter shelter : savedShelters) {
+                if (!shelterLocations.contains(shelter)) {
+                    shelterLocations.add(shelter);
+                    if (mMap != null) {
+
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(shelter.getLocation())
+                                .title(shelter.getName())
+                                .snippet("City: " + shelter.getCity())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+
+                        Marker fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                                .position(shelter.getLocation())
+                                .title(shelter.getName())
+                                .snippet("City: " + shelter.getCity())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                        shelterMarkers.put(shelter, new MarkerPair(marker, fullScreenMarker));
+
+                    }
+                }
+            }
         });
     }
 
@@ -326,7 +428,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     }
 
     public void publishObservation(LatLng location, String description) {
-        String observationId = generateObservationId(location, description);
+        String observationId = generateId(location, description);
 
         if (publishedObservationIds.contains(observationId)) {
             Log.d("MapsActivity", "Observation already published. Skipping: " + observationId);
@@ -341,7 +443,23 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         Log.d("MapsActivity", "Published observation: " + observationId);
     }
 
-    private String generateObservationId(LatLng location, String description) {
+    public void publishShelter(LatLng location, String name) {
+        String shelterId = generateId(location, name);
+
+        if (publishedShelterIds.contains(shelterId)) {
+            Log.d("MapsActivity", "Shelter already published. Skipping: " + shelterId);
+            return;
+        }
+
+        String topic = SHELTER_TOPIC;
+        String message = location.latitude + "," + location.longitude + "," + name;
+
+        mqttService.publishMessage(topic, message);
+        publishedShelterIds.add(shelterId);
+        Log.d("MapsActivity", "Published shelter: " + shelterId);
+    }
+
+    private String generateId(LatLng location, String description) {
         return location.latitude + "," + location.longitude + "," + description;
     }
 
@@ -350,7 +468,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
 
         if (savedObservations != null) {
             for (Observation observation : savedObservations) {
-                String observationId = generateObservationId(observation.getLocation(), observation.getDescription());
+                String observationId = generateId(observation.getLocation(), observation.getDescription());
 
                 if (!publishedObservationIds.contains(observationId)) {
                     String topic = OBSERVATION_TOPIC;
@@ -370,6 +488,32 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             Log.d("MapsActivity", "No saved observations to publish.");
         }
     }
+
+    private void publishSavedShelters() {
+        List<Shelter> savedShelters = FileUtils.loadSheltersFromFile(this);
+
+        if (savedShelters != null) {
+            for (Shelter shelter : savedShelters) {
+                String shelterId = generateId(shelter.getLocation(), shelter.getName());
+
+                if (!publishedShelterIds.contains(shelterId)) {
+                    String message = shelter.getLocation().latitude + "," +
+                            shelter.getLocation().longitude + "," +
+                            shelter.getName();
+
+                    mqttService.publishMessage(SHELTER_TOPIC, message);
+                    publishedShelterIds.add(shelterId);
+
+                    Log.d("MapsActivity", "Published saved shelter: " + shelterId);
+                } else {
+                    Log.d("MapsActivity", "Skipping already published shelter: " + shelterId);
+                }
+            }
+        } else {
+            Log.d("MapsActivity", "No saved shelters to publish.");
+        }
+    }
+
 
     private void loadSavedObservations() {
         if (mMap == null || fullScreenMap == null) {
@@ -464,6 +608,60 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
         });
     }
+
+    private void handleNewShelter(String message, String topic) {
+        runOnUiThread(() -> {
+            if (!topic.equals(SHELTER_TOPIC)) {
+                Log.w("MapsActivity", "Received message for unexpected topic: " + topic);
+                return;
+            }
+
+            String[] parts = message.split(",");
+            if (parts.length < 3) {
+                Log.d("MapsActivity", "Non-shelter message received: " + message);
+                return; // Ignore non-shelter messages
+            }
+
+            try {
+                double latitude = Double.parseDouble(parts[0]);
+                double longitude = Double.parseDouble(parts[1]);
+                String name = parts[2];
+
+                LatLng location = new LatLng(latitude, longitude);
+                Shelter shelter = new Shelter(name, getCityFromLocation(location), location);
+
+                if (!shelterLocations.contains(shelter)) {
+                    shelterLocations.add(shelter);
+
+                    runOnUiThread(() -> {
+                        if (mMap != null) {
+                            Marker marker = mMap.addMarker(new MarkerOptions()
+                                    .position(shelter.getLocation())
+                                    .title(shelter.getName())
+                                    .snippet("City: " + shelter.getCity())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+
+                            Marker fullScreenMarker = fullScreenMap.addMarker(new MarkerOptions()
+                                    .position(shelter.getLocation())
+                                    .title(shelter.getName())
+                                    .snippet("City: " + shelter.getCity())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                            shelterMarkers.put(shelter, new MarkerPair(marker, fullScreenMarker));
+                        }
+
+                        Log.d("MapsActivity", "Added shelter from MQTT: " + shelter);
+                    });
+                } else {
+                    Log.d("MapsActivity", "Duplicate shelter received. Skipping: " + shelter);
+                }
+            } catch (NumberFormatException e) {
+                Log.e("MapsActivity", "Error parsing shelter message: " + message, e);
+            }
+        });
+    }
+
 
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

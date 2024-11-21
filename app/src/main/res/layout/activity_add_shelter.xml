@@ -1,22 +1,21 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="8dp"
     android:background="?attr/android:windowBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:orientation="vertical">
 
-        <!-- Shelter Information Card -->
+        <!-- Add Shelter Container -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_margin="8dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
             app:cardBackgroundColor="?attr/colorSurface">
@@ -68,70 +67,20 @@
                         android:textColorHint="?attr/colorOnSurfaceVariant"
                         android:inputType="textPersonName" />
                 </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Action Buttons Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="?attr/colorSurface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:padding="16dp">
-
+                <!-- Action Button -->
                 <Button
                     android:id="@+id/publish_button"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
                     android:text="Publish Shelter"
                     android:textAllCaps="false"
                     android:textColor="?attr/colorOnPrimary"
-                    android:backgroundTint="?attr/colorPrimary"
+                    android:backgroundTint="?attr/colorTertiary"
                     app:cornerRadius="8dp" />
 
-                <Button
-                    android:id="@+id/show_list_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Shelter List"
-                    android:textAllCaps="false"
-                    android:textColor="?attr/colorOnPrimary"
-                    android:backgroundTint="?attr/colorSecondary"
-                    app:cornerRadius="8dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Location Information Display -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="?attr/colorSurface">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/location_text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Location information will appear here after publishing."
-                    android:textSize="16sp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -139,6 +88,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
             app:cardBackgroundColor="?attr/colorSurface">
@@ -158,13 +108,18 @@
                     android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="8dp" />
 
+                <!-- Custom ListView Item Layout -->
                 <ListView
                     android:id="@+id/shelters_list_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:divider="?attr/colorControlHighlight"
-                    android:dividerHeight="1dp" />
+                    android:nestedScrollingEnabled="true"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="30dp"
+                    android:padding="8dp"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

@@ -53,11 +53,6 @@ public class AsteroidRepository {
         return asteroidList;
     }
 
-    // Check if data is already loaded
-    public boolean isDataLoaded() {
-        return asteroidList != null && !asteroidList.isEmpty();
-    }
-
     // Save asteroid data to local cache
     public void saveAsteroidsToLocalCache(Context context, String jsonData) {
         try (FileOutputStream fos = context.openFileOutput(ASTEROID_CACHE_FILE, Context.MODE_PRIVATE)) {
@@ -98,7 +93,7 @@ public class AsteroidRepository {
                 @Override
                 public void onResponse(String jsonResponse) {
                     List<Asteroid> asteroidList = AsteroidParser.parseAsteroids(jsonResponse);
-                    if (asteroidList != null && !asteroidList.isEmpty()) {
+                    if (!asteroidList.isEmpty()) {
                         setAsteroidList(asteroidList); // Save to in-memory list
                         saveAsteroidsToLocalCache(context, jsonResponse); // Save to cache
                         callback.onSuccess(); // Notify the caller
@@ -121,11 +116,5 @@ public class AsteroidRepository {
                 callback.onFailure("No internet connection and no local cache available.");
             }
         }
-    }
-
-    // Check if local cache is available
-    public boolean isCacheAvailable(Context context) {
-        File file = new File(context.getFilesDir(), ASTEROID_CACHE_FILE);
-        return file.exists();
     }
 }

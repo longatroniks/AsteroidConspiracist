@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Arrow Head -->
+    <path
+        android:fillColor="?attr/colorAccent"
+        android:pathData="M24,2 L30,18 L18,18 Z" />
+
+    <!-- Arrow Body -->
+    <path
+        android:fillColor="?attr/colorAccent"
+        android:pathData="M22,18 L26,18 L26,42 L22,42 Z" />
+</vector>
+

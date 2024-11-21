@@ -44,7 +44,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="8dp">
 
             <!-- Basic Asteroid Information -->
             <com.google.android.material.card.MaterialCardView
@@ -208,6 +208,6 @@
         app:icon="@drawable/ic_arrow_back"
         app:layout_anchor="@id/appbar"
         app:layout_anchorGravity="bottom|end"
-        android:backgroundTint="?attr/colorSecondary"
+        android:backgroundTint="?attr/colorTertiary"
         android:textColor="?attr/colorOnPrimary" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

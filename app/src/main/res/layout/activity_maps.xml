@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,17 +12,28 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:cardBackgroundColor="?attr/colorSurface"
-        app:cardElevation="4dp"
         app:cardCornerRadius="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/viewPagerHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Observations"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
 
             <!-- ViewPager2 to Swipe Through Observations -->
             <androidx.viewpager2.widget.ViewPager2
@@ -41,12 +51,12 @@
         android:layout_height="0dp"
         android:layout_margin="8dp"
         app:cardBackgroundColor="?attr/colorSurface"
-        app:cardElevation="4dp"
         app:cardCornerRadius="8dp"
-        app:layout_constraintTop_toBottomOf="@id/observationSubscriptionCard"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/observationSubscriptionCard">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -58,28 +68,28 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/mapHeading"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Observation Map"
+                    android:text="Map"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:textStyle="bold" />
 
                 <!-- Full-Screen Toggle Icon Button -->
                 <ImageButton
                     android:id="@+id/btnToggleFullScreen"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Full Screen"
-                    android:src="@drawable/ic_compass"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
+                    android:src="@drawable/ic_full_screen" />
             </LinearLayout>
 
             <fragment
@@ -87,7 +97,7 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -97,8 +107,8 @@
         android:id="@+id/fullScreenMapOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:elevation="10dp">
+        android:elevation="10dp"
+        android:visibility="gone">
 
         <fragment
             android:id="@+id/fullScreenMap"
@@ -111,11 +121,11 @@
             android:id="@+id/btnExitFullScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
+            android:layout_gravity="top|start"
             android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Exit Full Screen"
-            android:src="@drawable/ic_arrow_back"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/ic_arrow_back" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
