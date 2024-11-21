@@ -45,7 +45,7 @@
         <item name="colorOnTertiaryContainer">@color/accent_blue</item>
 
         <!-- Accent and Highlight Colors -->
-        <item name="colorAccent">@color/earth_green_light</item>
+        <item name="colorAccent">@color/highlight_red</item>
         <item name="colorControlHighlight">@color/highlight_green</item>
         <item name="colorError">@color/highlight_red</item>
 
@@ -58,9 +58,9 @@
         <item name="colorOnPrimary">@color/white</item>
 
         <!-- Card and Status Bar Colors -->
-        <item name="cardBackgroundColor">@color/card_dark</item>
+        <item name="cardBackgroundColor">@color/black</item>
         <item name="android:statusBarColor">@color/status_bar_dark</item>
-        <item name="android:navigationBarColor">@color/highlight_red</item>
+        <item name="android:navigationBarColor">@color/black</item>
 
         <!-- Navigation Bar and Status Bar Light/Dark Modes -->
         <item name="android:windowLightStatusBar">true</item>

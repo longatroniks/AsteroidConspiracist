@@ -15,8 +15,8 @@
 
     <ImageView
         android:id="@+id/asteroid_image"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_marginTop="170dp"
         android:layout_centerHorizontal="true"
         android:contentDescription="Asteroid"

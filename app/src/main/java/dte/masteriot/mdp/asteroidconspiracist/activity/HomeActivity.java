@@ -171,11 +171,11 @@ public class HomeActivity extends BaseActivity {
     private void setupPieChart(List<Asteroid> asteroids) {
         List<Integer> colors = new ArrayList<>();
         colors.add(getColorByMode(R.color.primary_light, R.color.accent_blue_dark));
+        colors.add(getColorByMode(R.color.earth_green_light, R.color.highlight_green));
+        colors.add(getColorByMode(R.color.earth_green_dark, R.color.highlight_red));
         colors.add(getColorByMode(R.color.primary_variant, R.color.highlight_pink));
         colors.add(getColorByMode(R.color.earth_yellow_dark, R.color.tertiary_light));
-        colors.add(getColorByMode(R.color.earth_green_dark, R.color.highlight_red));
         colors.add(getColorByMode(R.color.earth_muted, R.color.highlight_orange));
-        colors.add(getColorByMode(R.color.earth_green_light, R.color.highlight_green));
 
         List<PieEntry> entries = new ArrayList<>();
         List<LegendItem> legendItems = new ArrayList<>();
@@ -332,11 +332,11 @@ public class HomeActivity extends BaseActivity {
     private void updateBarChartForSelectedAsteroid(Asteroid asteroid) {
         List<Integer> colors = new ArrayList<>();
         colors.add(getColorByMode(R.color.primary_light, R.color.accent_blue_dark));
+        colors.add(getColorByMode(R.color.earth_green_light, R.color.highlight_green));
+        colors.add(getColorByMode(R.color.earth_green_dark, R.color.highlight_red));
         colors.add(getColorByMode(R.color.primary_variant, R.color.highlight_pink));
         colors.add(getColorByMode(R.color.earth_yellow_dark, R.color.tertiary_light));
-        colors.add(getColorByMode(R.color.earth_green_dark, R.color.highlight_red));
         colors.add(getColorByMode(R.color.earth_muted, R.color.highlight_orange));
-        colors.add(getColorByMode(R.color.earth_green_light, R.color.highlight_green));
 
         if (asteroid == null) {
             Toast.makeText(this, "No asteroid data to display in bar chart.", Toast.LENGTH_SHORT).show();
