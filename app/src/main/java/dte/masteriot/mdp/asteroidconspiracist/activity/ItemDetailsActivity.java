@@ -43,21 +43,17 @@ public class ItemDetailsActivity extends AppCompatActivity {
         semiMajorAxisView = findViewById(R.id.asteroid_semi_major_axis);
         nasaJplUrlView = findViewById(R.id.asteroid_nasa_jpl_url);
 
-        // Set up back button
         ExtendedFloatingActionButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> finish());
 
-        // Initialize ViewModel
         viewModel = new ViewModelProvider(this).get(ItemDetailsViewModel.class);
 
-        // Observe the asteroid data
         viewModel.getAsteroid().observe(this, asteroid -> {
             if (asteroid != null) {
                 updateUIWithAsteroidDetails(asteroid);
             }
         });
 
-        // Load asteroid data from the intent
         loadAsteroidDataFromIntent();
     }
 
@@ -76,7 +72,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
             asteroid.setSemiMajorAxis(intent.getDoubleExtra("asteroid_semi_major_axis", 0));
             asteroid.setNasaJplUrl(intent.getStringExtra("asteroid_nasa_jpl_url"));
 
-            // Pass the asteroid data to the ViewModel
             viewModel.setAsteroid(asteroid);
         }
     }

@@ -1,5 +1,6 @@
 package dte.masteriot.mdp.asteroidconspiracist.activity.recyclerview.observation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,18 @@ public class ObservationPagerAdapter extends RecyclerView.Adapter<ObservationPag
     public ObservationPagerAdapter(List<Observation> observations, OnObservationClickListener clickListener) {
         this.observations = observations;
         this.clickListener = clickListener;
+    }
+
+    public void updateObservations(List<Observation> newObservations) {
+        Log.d("ObservationPagerAdapter", "Adapter received " + newObservations.size() + " observations.");
+        observations.clear();
+        observations.addAll(newObservations);
+
+        for (Observation obs : newObservations) {
+            Log.d("ObservationPagerAdapter", "Observation: " + obs.getDescription());
+        }
+
+        notifyDataSetChanged();
     }
 
     @NonNull

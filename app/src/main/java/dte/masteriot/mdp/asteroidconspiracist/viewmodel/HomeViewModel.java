@@ -25,7 +25,7 @@ public class HomeViewModel extends ViewModel {
     private boolean isDataLoaded = false;
 
     public LiveData<List<Asteroid>> getAsteroidsLiveData() {
-        return asteroidsLiveData; // Expose as LiveData
+        return asteroidsLiveData;
     }
 
     public LiveData<Boolean> getIsLoadingLiveData() {
@@ -48,7 +48,7 @@ public class HomeViewModel extends ViewModel {
         if (isDataLoaded || Boolean.TRUE.equals(isLoadingLiveData.getValue())) return;
 
         Log.d("HomeViewModel", "Starting asteroid data fetch...");
-        isLoadingLiveData.postValue(true); // Ensure loading state is active
+        isLoadingLiveData.postValue(true);
 
         asteroidRepository.fetchAsteroids(context, isNetworkAvailable, new AsteroidRepository.FetchCallback() {
             @Override
@@ -58,16 +58,15 @@ public class HomeViewModel extends ViewModel {
                     asteroidsLiveData.setValue(asteroidRepository.getAsteroidList());
                     isDataLoaded = true;
                 }
-                isLoadingLiveData.postValue(false); // Loading is complete
+                isLoadingLiveData.postValue(false);
             }
 
             @Override
             public void onFailure(String error) {
                 Log.d("HomeViewModel", "Asteroid data fetch failed: " + error);
                 errorMessageLiveData.setValue(error);
-                isLoadingLiveData.postValue(false); // Ensure loading is hidden even on failure
+                isLoadingLiveData.postValue(false);
             }
         });
     }
-
 }

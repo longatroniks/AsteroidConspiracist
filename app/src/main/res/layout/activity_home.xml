@@ -12,7 +12,6 @@
         android:background="?attr/android:windowBackground"
         tools:context=".activity.HomeActivity">
 
-        <!-- Loading Screen with Message and Spinner -->
         <TextView
             android:id="@+id/loadingMessage"
             android:layout_width="wrap_content"
@@ -39,7 +38,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Pie Chart Section inside MaterialCardView -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/pieChartCard"
             android:layout_width="match_parent"
@@ -91,7 +89,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Bar Chart Section inside MaterialCardView -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/barChartCard"
             android:layout_width="match_parent"
@@ -127,7 +124,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Details Section inside MaterialCardView -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/detailsCard"
             android:layout_width="match_parent"

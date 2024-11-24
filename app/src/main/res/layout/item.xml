@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Asteroid Title -->
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
@@ -27,7 +26,6 @@
             android:paddingBottom="4dp"
             android:textStyle="bold" />
 
-        <!-- Orbit ID and other details -->
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
@@ -37,7 +35,6 @@
             android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginTop="4dp" />
 
-        <!-- Divider Line -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -45,7 +42,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
-        <!-- Diameter and Distance details -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

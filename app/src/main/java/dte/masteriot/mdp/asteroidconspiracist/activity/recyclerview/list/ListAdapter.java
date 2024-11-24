@@ -66,7 +66,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListViewHolder> {
         this.selectionTracker = selectionTracker;
     }
 
-    // Method to update the data in the adapter
     public void updateData(List<Asteroid> newAsteroids) {
         this.asteroids.clear();
         this.asteroids.addAll(newAsteroids);

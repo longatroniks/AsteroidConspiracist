@@ -25,7 +25,7 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        applyThemeBasedOnSettings(); // Apply theme before activity is created
+        applyThemeBasedOnSettings();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
 
@@ -38,7 +38,6 @@ public class BaseActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Set activity title in the toolbar
         String activityTitle = getActivityTitle();
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(activityTitle);
@@ -49,14 +48,12 @@ public class BaseActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-        // Create the toggle (hamburger icon)
         Toolbar toolbar = findViewById(R.id.toolbar);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState(); // Synchronize the drawer toggle state
 
-        // Set navigation menu item click handling
         navigationView.setNavigationItemSelectedListener(item -> {
             handleNavigationItemClick(item);
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -65,22 +62,18 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private void setupHighContrastSwitch() {
-        // Find the switch in the navigation menu
         Switch highContrastSwitch = (Switch) navigationView.getMenu()
                 .findItem(R.id.switch_high_contrast)
                 .getActionView();
 
-        // Load the current preference state
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isHighContrastEnabled = prefs.getBoolean(PREF_HIGH_CONTRAST_MODE, false);
         highContrastSwitch.setChecked(isHighContrastEnabled);
 
-        // Listen for switch toggle events
         highContrastSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d("BaseActivity", "High contrast mode toggled: " + isChecked);
             prefs.edit().putBoolean(PREF_HIGH_CONTRAST_MODE, isChecked).apply();
 
-            // Restart activity to apply the new theme
             restartActivity();
         });
     }
@@ -120,7 +113,6 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private String getActivityTitle() {
-        // Dynamically set the title based on the activity class name
         String className = getClass().getSimpleName();
         switch (className) {
             case "HomeActivity":
@@ -134,12 +126,11 @@ public class BaseActivity extends AppCompatActivity {
             case "AddShelterActivity":
                 return "Add Shelter";
             default:
-                return "AsteroidConspiracist"; // Default app title
+                return "AsteroidConspiracist";
         }
     }
 
     private void restartActivity() {
-        // Explicitly restart the current activity
         Intent intent = getIntent();
         finish();
         startActivity(intent);

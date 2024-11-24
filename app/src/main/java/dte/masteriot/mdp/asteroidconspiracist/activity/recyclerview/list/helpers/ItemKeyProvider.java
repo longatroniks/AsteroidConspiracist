@@ -13,11 +13,6 @@ public class ItemKeyProvider extends androidx.recyclerview.selection.ItemKeyProv
     private static final String TAG = "TAGAsteroidConspiracist, ItemKeyProvider";
     RecyclerView recView;
 
-    /**
-     * Creates a new provider with the given scope.
-     *
-     * @param scope Scope can't be changed at runtime.
-     */
     @SuppressLint("LongLogTag")
     public ItemKeyProvider(int scope, RecyclerView rv) {
         super(scope);
