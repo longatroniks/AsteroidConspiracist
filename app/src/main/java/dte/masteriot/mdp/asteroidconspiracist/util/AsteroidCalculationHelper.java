@@ -8,12 +8,6 @@ import dte.masteriot.mdp.asteroidconspiracist.entity.Asteroid;
 
 public class AsteroidCalculationHelper {
 
-    /**
-     * Calculates the threat score for a given asteroid.
-     *
-     * @param asteroid The asteroid to calculate the score for.
-     * @return The calculated threat score (1-100).
-     */
     public int calculateThreatScore(Asteroid asteroid) {
         double distanceWeight = 0.3;
         double velocityWeight = 0.2;
@@ -45,12 +39,6 @@ public class AsteroidCalculationHelper {
         return (int) Math.min(100, Math.max(1, rawScore * 100));
     }
 
-    /**
-     * Calculates the threat percentages for a list of asteroids.
-     *
-     * @param asteroids The list of asteroids to calculate percentages for.
-     * @return A map of asteroids to their threat percentages.
-     */
     public Map<Asteroid, Float> calculateThreatPercentages(List<Asteroid> asteroids) {
         Map<Asteroid, Float> threatPercentages = new HashMap<>();
         int totalScore = 0;
@@ -79,14 +67,6 @@ public class AsteroidCalculationHelper {
         return threatPercentages;
     }
 
-    /**
-     * Normalizes a value within a given range.
-     *
-     * @param value The value to normalize.
-     * @param min   The minimum value of the range.
-     * @param max   The maximum value of the range.
-     * @return The normalized value (0.0 to 1.0).
-     */
     public double normalize(double value, double min, double max) {
         if (max == min) return 1;
         return (value - min) / (max - min);

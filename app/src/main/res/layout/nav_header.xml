@@ -9,7 +9,6 @@
     android:gravity="start"
     app:cardBackgroundColor="?attr/colorSurface">
 
-    <!-- Logo/Image -->
     <ImageView
         android:id="@+id/nav_header_logo"
         android:layout_width="60dp"
@@ -19,7 +18,6 @@
         android:contentDescription="@string/app_name"
         android:layout_gravity="start" />
 
-    <!-- App Name -->
     <TextView
         android:id="@+id/nav_header_title"
         android:layout_width="match_parent"
@@ -32,7 +30,6 @@
         android:ellipsize="end"
         android:singleLine="true" />
 
-    <!-- Tagline or additional description -->
     <TextView
         android:id="@+id/nav_header_subtitle"
         android:layout_width="match_parent"

@@ -1,6 +1,4 @@
-<!-- res/values-night/themes.xml -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base Dark Theme -->
     <style name="Base.Theme.AsteroidConspiracist.Dark" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">@font/spacemonoregular</item>
         <item name="android:windowBackground">@color/dark_background</item>
@@ -22,7 +20,6 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog.Dark</item>
     </style>
 
-    <!-- High Contrast Dark Theme -->
     <style name="Base.Theme.AsteroidConspiracist.HighContrast.Dark" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/black</item>
         <item name="colorPrimary">@color/white</item>
@@ -43,7 +40,6 @@
         <item name="colorControlHighlight">@color/yellow</item>
     </style>
 
-    <!-- Main themes for dark mode and high contrast dark mode -->
     <style name="Theme.AsteroidConspiracist.Dark" parent="Base.Theme.AsteroidConspiracist.Dark" />
     <style name="Theme.AsteroidConspiracist.HighContrast.Dark" parent="Base.Theme.AsteroidConspiracist.HighContrast.Dark" />
 </resources>

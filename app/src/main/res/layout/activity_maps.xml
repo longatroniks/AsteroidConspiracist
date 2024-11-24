@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="?attr/android:windowBackground">
 
-    <!-- Observation Subscription Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/observationSubscriptionCard"
         android:layout_width="match_parent"
@@ -24,7 +23,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Title -->
             <TextView
                 android:id="@+id/viewPagerHeading"
                 android:layout_width="match_parent"
@@ -35,7 +33,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 
-            <!-- ViewPager2 to Swipe Through Observations -->
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/observationViewPager"
                 android:layout_width="match_parent"
@@ -44,7 +41,6 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Map Fragment Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/mapCard"
         android:layout_width="match_parent"
@@ -64,7 +60,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Horizontal layout to align the title and fullscreen button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,7 +77,6 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Full-Screen Toggle Icon Button -->
                 <ImageButton
                     android:id="@+id/btnToggleFullScreen"
                     android:layout_width="wrap_content"
@@ -97,12 +91,15 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="16dp" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
 
-    <!-- Full-Screen Map Overlay with Higher Elevation -->
     <FrameLayout
         android:id="@+id/fullScreenMapOverlay"
         android:layout_width="match_parent"
@@ -116,7 +113,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- Exit Full Screen Icon Button -->
         <ImageButton
             android:id="@+id/btnExitFullScreen"
             android:layout_width="wrap_content"

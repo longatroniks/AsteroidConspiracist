@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base Light Theme -->
     <style name="Base.Theme.AsteroidConspiracist.Light" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:fontFamily">@font/spacemonoregular</item>
         <item name="android:windowBackground">@color/light_background</item>
@@ -26,15 +25,12 @@
 
     </style>
 
-    <!-- High Contrast Light Theme -->
     <style name="Base.Theme.AsteroidConspiracist.HighContrast.Light" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Window and Background Colors -->
         <item name="android:windowBackground">@color/black</item>
         <item name="colorSurface">@color/surface_dark</item>
         <item name="colorSurfaceVariant">@color/card_dark</item>
         <item name="colorOnSecondaryContainer">@color/black</item>
 
-        <!-- Primary and Secondary Colors -->
         <item name="colorPrimary">@color/accent_blue</item>
         <item name="colorPrimaryVariant">@color/accent_blue_dark</item>
         <item name="colorSecondary">@color/tertiary_light</item>
@@ -44,12 +40,10 @@
         <item name="colorOnTertiaryFixed">@color/tertiary_light</item>
         <item name="colorOnTertiaryContainer">@color/accent_blue</item>
 
-        <!-- Accent and Highlight Colors -->
         <item name="colorAccent">@color/highlight_red</item>
         <item name="colorControlHighlight">@color/highlight_green</item>
         <item name="colorError">@color/highlight_red</item>
 
-        <!-- Text Colors -->
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
         <item name="android:textColorHint">@color/tertiary_light</item>
@@ -57,16 +51,13 @@
         <item name="colorOnSurfaceVariant">@color/text_secondary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
 
-        <!-- Card and Status Bar Colors -->
         <item name="cardBackgroundColor">@color/black</item>
         <item name="android:statusBarColor">@color/status_bar_dark</item>
         <item name="android:navigationBarColor">@color/black</item>
 
-        <!-- Navigation Bar and Status Bar Light/Dark Modes -->
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <!-- Main themes for light mode and high contrast light mode -->
     <style name="Theme.AsteroidConspiracist.Light" parent="Base.Theme.AsteroidConspiracist.Light" />
     <style name="Theme.AsteroidConspiracist.HighContrast.Light" parent="Base.Theme.AsteroidConspiracist.HighContrast.Light" />
 </resources>

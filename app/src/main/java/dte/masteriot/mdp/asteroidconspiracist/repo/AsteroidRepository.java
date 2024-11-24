@@ -29,13 +29,11 @@ public class AsteroidRepository {
         void onFailure(String error);
     }
 
-    // Private constructor for singleton
     private AsteroidRepository() {
-        this.apiService = new NeoWsAPIService(); // Instantiate the API service here
-        this.asteroidList = null; // Data is not loaded initially
+        this.apiService = new NeoWsAPIService();
+        this.asteroidList = null;
     }
 
-    // Singleton instance
     public static synchronized AsteroidRepository getInstance() {
         if (instance == null) {
             instance = new AsteroidRepository();
@@ -43,17 +41,14 @@ public class AsteroidRepository {
         return instance;
     }
 
-    // Set asteroid list (typically after fetching)
     public void setAsteroidList(List<Asteroid> asteroids) {
         this.asteroidList = asteroids;
     }
 
-    // Get asteroid list
     public List<Asteroid> getAsteroidList() {
         return asteroidList;
     }
 
-    // Save asteroid data to local cache
     public void saveAsteroidsToLocalCache(Context context, String jsonData) {
         try (FileOutputStream fos = context.openFileOutput(ASTEROID_CACHE_FILE, Context.MODE_PRIVATE)) {
             fos.write(jsonData.getBytes());
@@ -63,7 +58,6 @@ public class AsteroidRepository {
         }
     }
 
-    // Load asteroid data from local cache
     public List<Asteroid> loadAsteroidsFromLocalCache(Context context) {
         File file = new File(context.getFilesDir(), ASTEROID_CACHE_FILE);
         if (!file.exists()) {
@@ -86,7 +80,6 @@ public class AsteroidRepository {
         }
     }
 
-    // Fetch asteroids from API or cache based on network availability
     public void fetchAsteroids(Context context, boolean isNetworkAvailable, FetchCallback callback) {
         if (isNetworkAvailable) {
             apiService.fetchAsteroids(new NeoWsAPIService.NeoWsAPIResponse() {
@@ -94,9 +87,9 @@ public class AsteroidRepository {
                 public void onResponse(String jsonResponse) {
                     List<Asteroid> asteroidList = AsteroidParser.parseAsteroids(jsonResponse);
                     if (!asteroidList.isEmpty()) {
-                        setAsteroidList(asteroidList); // Save to in-memory list
-                        saveAsteroidsToLocalCache(context, jsonResponse); // Save to cache
-                        callback.onSuccess(); // Notify the caller
+                        setAsteroidList(asteroidList);
+                        saveAsteroidsToLocalCache(context, jsonResponse);
+                        callback.onSuccess();
                     } else {
                         callback.onFailure("No asteroid data available from API.");
                     }

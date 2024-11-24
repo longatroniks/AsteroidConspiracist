@@ -13,7 +13,6 @@ public class MqttService {
     private int serverPort = 1883;
     private boolean isConnecting = false;
 
-    // Initialize the MQTT client
     public void createMQTTClient(String clientId) {
         client = MqttClient.builder()
                 .useMqttVersion3()
@@ -24,7 +23,6 @@ public class MqttService {
                 .buildAsync();
     }
 
-    // Connect to the MQTT broker and set up a subscription callback
     public CompletableFuture<Boolean> connectToBroker(String topic, MessageCallback callback) {
         if (isConnecting || (client != null && client.getState().isConnected())) {
             Log.d("MqttService", "Client is already connected or connecting. Skipping connect attempt.");
@@ -36,10 +34,8 @@ public class MqttService {
         return client.connectWith().cleanSession(false).send().thenApply(connAck -> {
             isConnecting = false;
 
-            // Subscribe to the specified topic
             subscribeToTopic(topic, callback);
 
-            // Publish a message to indicate successful connection
             String successMessage = "Client connected successfully to broker!";
             publishMessage(topic, successMessage);
             Log.d("MqttService", "Connection message sent to topic: " + topic);
@@ -52,8 +48,6 @@ public class MqttService {
         });
     }
 
-
-    // Subscribe to a specific topic
     public void subscribeToTopic(String topic, MessageCallback callback) {
         if (client == null || !client.getState().isConnected()) {
             Log.w("MqttService", "Cannot subscribe. Client is not connected.");
@@ -76,26 +70,6 @@ public class MqttService {
                 });
     }
 
-    // Unsubscribe from a specific topic
-    public void unsubscribeFromTopic(String topic) {
-        if (client == null || !client.getState().isConnected()) {
-            Log.w("MqttService", "Cannot unsubscribe. Client is not connected.");
-            return;
-        }
-
-        client.unsubscribeWith()
-                .topicFilter(topic)
-                .send()
-                .whenComplete((unsubAck, throwable) -> {
-                    if (throwable != null) {
-                        Log.e("MqttService", "Failed to unsubscribe from topic: " + topic, throwable);
-                    } else {
-                        Log.d("MqttService", "Unsubscribed from topic: " + topic);
-                    }
-                });
-    }
-
-    // Publish a message to a topic
     public void publishMessage(String topic, String message) {
         if (client == null || !client.getState().isConnected()) {
             Log.w("MqttService", "Cannot publish. Client is not connected.");
@@ -112,7 +86,6 @@ public class MqttService {
                 });
     }
 
-    // Disconnect the MQTT client
     public void disconnect() {
         if (client != null) {
             client.disconnect()

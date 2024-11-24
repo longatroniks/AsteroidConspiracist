@@ -17,21 +17,12 @@ public class Observation {
         this.cityName = cityName;
     }
 
-    // Getter and setter methods
     public LatLng getLocation() {
         return location;
     }
 
-    public void setLocation(LatLng location) {
-        this.location = location;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getTimestamp() {
@@ -46,18 +37,6 @@ public class Observation {
         return cityName;
     }
 
-    public void setCityName(String cityName) {
-        this.cityName = cityName;
-    }
-
-    // Method to return a formatted string of observation details
-    public String getFormattedInfo() {
-        return "Description: " + description + "\n" +
-                "Time: " + timestamp + "\n" +
-                "Location: " + cityName;
-    }
-
-    // Equals method: Compare Observations based on location and description
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,7 +45,6 @@ public class Observation {
         return location.equals(that.location) && description.equals(that.description);
     }
 
-    // HashCode method: Generate hash code based on location and description
     @Override
     public int hashCode() {
         return Objects.hash(location, description);

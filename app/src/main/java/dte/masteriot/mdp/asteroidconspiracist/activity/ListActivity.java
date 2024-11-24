@@ -59,7 +59,6 @@ public class ListActivity extends BaseActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Selection tracker setup
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
                 recyclerView,
@@ -93,7 +92,6 @@ public class ListActivity extends BaseActivity {
         });
 
         listViewModel.getIsLoadingLiveData().observe(this, isLoading -> {
-            // Optionally show/hide a loading spinner if needed
             if (isLoading) {
                 Log.d(TAG, "Loading asteroid data...");
             } else {

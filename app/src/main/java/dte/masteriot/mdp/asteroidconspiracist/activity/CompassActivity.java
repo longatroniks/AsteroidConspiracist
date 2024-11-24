@@ -6,7 +6,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -62,31 +60,25 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate layout into BaseActivity's content frame
         View contentView = getLayoutInflater().inflate(R.layout.activity_compass, null);
         FrameLayout contentFrame = findViewById(R.id.content_frame);
         contentFrame.addView(contentView);
 
-        // Initialize UI components
         northArrowImage = findViewById(R.id.north_arrow);
         shelterArrowImage = findViewById(R.id.shelter_arrow);
         directionText = findViewById(R.id.direction_text);
         instructionText = findViewById(R.id.instruction_text);
         shelterInfoText = findViewById(R.id.shelter_info_text);
 
-        // Initialize sensor manager and sensors
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        // Initialize location client
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Load saved shelters and connect to MQTT
         loadSavedShelters();
         connectToBroker();
 
-        // Fetch user's location
         fetchUserLocation();
     }
 
@@ -101,7 +93,6 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
     @Override
     protected void onPause() {
         super.onPause();
-        // Unregister listeners to save battery
         sensorManager.unregisterListener(this);
     }
 
@@ -147,8 +138,6 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
 
     private void fetchUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
@@ -183,24 +172,19 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
 
-                // Convert from radians to degrees
                 azimuth = (float) Math.toDegrees(orientation[0]);
                 azimuth = (azimuth + 360) % 360; // Normalize to 0–360 degrees
 
-                // Apply a simple smoothing filter
                 smoothedAzimuth = smoothedAzimuth * 0.9f + azimuth * 0.1f;
 
-                // Rotate the north arrow to align with magnetic north
                 northArrowImage.setRotation(-smoothedAzimuth);
 
-                // Update nearest shelter arrow
                 if (nearestShelter != null && userLocation != null) {
                     float bearingToShelter = calculateBearing(userLocation, nearestShelter.getLocation());
                     float shelterAzimuth = (bearingToShelter - smoothedAzimuth + 360) % 360;
                     shelterArrowImage.setRotation(-shelterAzimuth);
                 }
 
-                // Update UI
                 updateDirectionLabel(smoothedAzimuth);
             }
         }
@@ -223,18 +207,17 @@ public class CompassActivity extends BaseActivity implements SensorEventListener
     private void updateNearestShelterInfo() {
         if (userLocation == null || shelters.isEmpty()) return;
 
-        // Find nearest shelter
         nearestShelter = Collections.min(shelters, Comparator.comparingDouble(shelter -> distanceBetween(userLocation, shelter.getLocation())));
 
         double distance = distanceBetween(userLocation, nearestShelter.getLocation());
         shelterInfoText.setText(String.format("Nearest Shelter: %s (%s)\nDistance: %.1f km",
                 nearestShelter.getName(),
                 nearestShelter.getCity(),
-                distance / 1000.0)); // Convert to kilometers
+                distance / 1000.0));
     }
 
     private double distanceBetween(LatLng from, LatLng to) {
-        double earthRadius = 6371000; // meters
+        double earthRadius = 6371000;
         double dLat = Math.toRadians(to.latitude - from.latitude);
         double dLon = Math.toRadians(to.longitude - from.longitude);
         double lat1 = Math.toRadians(from.latitude);

@@ -15,14 +15,10 @@ public class Shelter {
         this.location = location;
     }
 
-    // Getter and setter methods
     public LatLng getLocation() {
         return location;
     }
 
-    public void setLocation(LatLng location) {
-        this.location = location;
-    }
 
     public String getName() {
         return name;
@@ -36,11 +32,6 @@ public class Shelter {
         return city;
     }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    // Equals method: Compare Shelters based on location and name
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,7 +40,6 @@ public class Shelter {
         return location.equals(shelter.location) && name.equals(shelter.name);
     }
 
-    // HashCode method: Generate hash code based on location and name
     @Override
     public int hashCode() {
         return Objects.hash(location, name);

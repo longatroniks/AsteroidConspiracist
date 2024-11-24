@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -37,6 +38,7 @@ import dte.masteriot.mdp.asteroidconspiracist.entity.Shelter;
 import dte.masteriot.mdp.asteroidconspiracist.service.MqttService;
 import dte.masteriot.mdp.asteroidconspiracist.util.date.DateUtils;
 import dte.masteriot.mdp.asteroidconspiracist.util.file.FileUtils;
+import dte.masteriot.mdp.asteroidconspiracist.viewmodel.MapsViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +56,8 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     private static final String SHELTER_TOPIC = "AsteroidShelter";
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
+    private MapsViewModel viewModel;
 
     private FusedLocationProviderClient fusedLocationClient;
     private final MqttService mqttService = new MqttService();
@@ -95,53 +99,97 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate the MapsActivity layout and add it to the BaseActivity content frame
         View contentView = getLayoutInflater().inflate(R.layout.activity_maps, null);
         FrameLayout contentFrame = findViewById(R.id.content_frame);
         contentFrame.addView(contentView);
 
-        // Initialize ViewPager2 and Adapter with click listener to move map
+        viewModel = new ViewModelProvider(this).get(MapsViewModel.class);
+
         ViewPager2 observationViewPager = findViewById(R.id.observationViewPager);
-        adapter = new ObservationPagerAdapter(observationLocations, this::moveToObservationLocation);
-        observationViewPager.setAdapter(adapter);  // Set adapter initially
+        adapter = new ObservationPagerAdapter(new ArrayList<>(), this::moveToObservationLocation);
+        observationViewPager.setAdapter(adapter);
+
+        viewModel.getIsFullScreen().observe(this, fullScreen -> {
+            if (fullScreen != null) {
+                isFullScreen = fullScreen;
+                fullScreenMapOverlay.setVisibility(fullScreen ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        viewModel.getObservationLocations().observe(this, observations -> {
+            Log.d("MapsActivity", "Observations updated in ViewPager: " + observations.size());
+            if (observations != null) {
+                adapter.updateObservations(observations);
+            }
+        });
 
         btnToggleFullScreen = findViewById(R.id.btnToggleFullScreen);
         btnExitFullScreen = findViewById(R.id.btnExitFullScreen);
         fullScreenMapOverlay = findViewById(R.id.fullScreenMapOverlay);
 
-        // Set up Full Screen Toggle
-        btnToggleFullScreen.setOnClickListener(v -> enterFullScreenMode());
-        btnExitFullScreen.setOnClickListener(v -> exitFullScreenMode());
+        if (btnToggleFullScreen != null) {
+            btnToggleFullScreen.setOnClickListener(v -> viewModel.setFullScreen(true));
+        }
+        if (btnExitFullScreen != null) {
+            btnExitFullScreen.setOnClickListener(v -> viewModel.setFullScreen(false));
+        }
 
-        // Set up the map
+        initializeMapFragments();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mqttService.createMQTTClient("maps-activity-client");
+        connectToBroker();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isFullScreen", isFullScreen);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            isFullScreen = savedInstanceState.getBoolean("isFullScreen", false);
+            if (isFullScreen) {
+                enterFullScreenMode();
+            } else {
+                exitFullScreenMode();
+            }
+        }
+    }
+
+    private void initializeMapFragments() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(googleMap -> {
                 mMap = googleMap;
                 setupMap(mMap);
+                Log.d("MapsActivity", "Main map initialized");
             });
+        } else {
+            Log.e("MapsActivity", "Main map fragment is null");
         }
 
-        // Set up full-screen map
         SupportMapFragment fullScreenMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fullScreenMap);
         if (fullScreenMapFragment != null) {
             fullScreenMapFragment.getMapAsync(googleMap -> {
                 fullScreenMap = googleMap;
                 setupMap(fullScreenMap);
+                Log.d("MapsActivity", "Fullscreen map initialized");
             });
+        } else {
+            Log.e("MapsActivity", "Fullscreen map fragment is null");
         }
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mqttService.createMQTTClient("maps-activity-client");
-        connectToBroker();
     }
+
 
     private void enterFullScreenMode() {
         fullScreenMapOverlay.setVisibility(View.VISIBLE);
         isFullScreen = true;
 
         if (mMap != null && fullScreenMap != null) {
-            // Sync camera position
             fullScreenMap.moveCamera(CameraUpdateFactory.newCameraPosition(mMap.getCameraPosition()));
         }
     }
@@ -196,7 +244,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
 
         setupMap(mMap);
 
-        // Process pending observations
         runOnUiThread(() -> {
             for (Observation observation : pendingObservations) {
                 LatLng location = observation.getLocation();
@@ -209,7 +256,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
             pendingObservations.clear();
 
-            // Process pending shelters
             for (Shelter shelter : pendingShelters) {
                 LatLng location = shelter.getLocation();
                 String name = shelter.getName();
@@ -222,7 +268,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             }
             pendingShelters.clear();
 
-            // Load saved observations and shelters
             loadSavedObservations();
             loadSavedShelters();
         });
@@ -331,12 +376,13 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         FileUtils.saveObservationToFile(this, location, description, timestamp, cityName);
 
         Observation newObservation = new Observation(location, description, timestamp, cityName);
-        observationLocations.add(newObservation);
+
+        Log.d("MapsActivity", "Saving observation: " + newObservation);
+        viewModel.addObservation(newObservation);
 
         runOnUiThread(() -> {
             adapter.notifyDataSetChanged();
 
-            // Add markers to both maps
             Marker normalMarker = null;
             Marker fullScreenMarker = null;
 
@@ -362,7 +408,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     private void saveShelter(LatLng location, String name, String city) {
         Shelter newShelter = new Shelter(name, city, location);
         shelterLocations.add(newShelter);
-        FileUtils.saveShelterToFile(this, location, name, city); // Save to file
+        FileUtils.saveShelterToFile(this, location, name, city);
 
         runOnUiThread(() -> {
             if (mMap != null) {
@@ -386,7 +432,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     }
 
     private void loadSavedShelters() {
-        List<Shelter> savedShelters = FileUtils.loadSheltersFromFile(this); // Load from file
+        List<Shelter> savedShelters = FileUtils.loadSheltersFromFile(this);
         runOnUiThread(() -> {
             for (Shelter shelter : savedShelters) {
                 if (!shelterLocations.contains(shelter)) {
@@ -522,7 +568,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
         }
 
         List<Observation> savedObservations = FileUtils.loadObservationsFromFile(this);
-
+        Log.d("MapsActivity", "Loaded saved observations: " + savedObservations.size());
         runOnUiThread(() -> {
             for (Observation obs : savedObservations) {
                 if (!observationLocations.contains(obs)) {
@@ -554,6 +600,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
     }
 
     private void handleNewObservation(String message, String topic) {
+        Log.d("MapsActivity", "Received observation message: " + message);
         runOnUiThread(() -> {
             if (!topic.equals(OBSERVATION_TOPIC)) {
                 Log.w("MapsActivity", "Received message for unexpected topic: " + topic);
@@ -563,7 +610,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
             String[] parts = message.split(",");
             if (parts.length < 3) {
                 Log.d("MapsActivity", "Non-observation message received: " + message);
-                return; // Ignore non-observation messages
+                return;
             }
 
             try {
@@ -572,13 +619,17 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
                 String description = parts[2];
 
                 LatLng location = new LatLng(latitude, longitude);
-                Observation observation = new Observation(location, description, DateUtils.generateTimestamp(), getCityFromLocation(location));
+                Observation observation = new Observation(
+                        location,
+                        description,
+                        DateUtils.generateTimestamp(),
+                        getCityFromLocation(location)
+                );
 
                 if (!observationLocations.contains(observation)) {
                     observationLocations.add(observation);
-                    adapter.notifyDataSetChanged();
+                    viewModel.addObservation(observation);
 
-                    // Add markers to both maps
                     Marker normalMarker = null;
                     Marker fullScreenMarker = null;
 
@@ -599,7 +650,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback, Go
                     observationMarkers.put(observation, new MarkerPair(normalMarker, fullScreenMarker));
 
                     Log.d("MapsActivity", "Added observation from MQTT: " + observation);
-
                 } else {
                     Log.d("MapsActivity", "Duplicate observation received. Skipping: " + observation);
                 }

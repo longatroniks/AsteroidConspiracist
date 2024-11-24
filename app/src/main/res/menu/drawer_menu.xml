@@ -1,8 +1,6 @@
-<!-- res/menu/sidebar_menu.xml -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Section: Navigation -->
     <group android:id="@+id/group_navigation" android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
@@ -40,7 +38,6 @@
             android:titleTextColor="?attr/colorOnSurface" />
     </group>
 
-    <!-- Section: Accessibility -->
     <group android:id="@+id/group_accessibility">
         <item
             android:id="@+id/switch_high_contrast"
